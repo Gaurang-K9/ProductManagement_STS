@@ -1,6 +1,6 @@
 package com.demo.service;
 
-import com.demo.model.Review;
+import com.demo.model.review.Review;
 import com.demo.repo.ReviewRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

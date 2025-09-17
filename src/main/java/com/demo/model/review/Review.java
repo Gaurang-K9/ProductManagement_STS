@@ -1,5 +1,6 @@
-package com.demo.model;
+package com.demo.model.review;
 
+import com.demo.model.Product.Product;
 import com.demo.model.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -15,8 +16,9 @@ public class Review {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long review_id;
+	private Long review_id;
 	@ManyToOne
+    @JsonBackReference
 	private User user;
 	@ManyToOne
 	@JoinColumn(name = "product_id")

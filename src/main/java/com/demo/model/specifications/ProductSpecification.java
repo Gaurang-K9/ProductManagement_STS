@@ -1,6 +1,6 @@
 package com.demo.model.specifications;
 
-import com.demo.model.Product;
+import com.demo.model.Product.Product;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ProductSpecification {

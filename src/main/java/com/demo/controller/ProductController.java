@@ -3,12 +3,13 @@ package com.demo.controller;
 import java.util.List;
 import java.util.Optional;
 
+import com.demo.model.Product.ProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.demo.model.Product;
+import com.demo.model.Product.Product;
 import com.demo.service.ProductService;
 
 @RestController
@@ -56,8 +57,8 @@ public class ProductController {
 	}
 	
 	@PostMapping("/product")
-	public ResponseEntity<String> addProduct(@RequestBody Product product){
-		String response = productService.addProduct(product);
+	public ResponseEntity<String> addProduct(@RequestBody ProductDTO productDTO){
+		String response = productService.addProduct(productDTO);
 		
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}

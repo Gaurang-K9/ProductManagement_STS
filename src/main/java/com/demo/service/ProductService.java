@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.demo.model.Product.ProductConverter;
+import com.demo.model.Product.ProductDTO;
+import com.demo.repo.CompanyRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.demo.model.Product;
+import com.demo.model.Product.Product;
 import com.demo.repo.ProductRepo;
 
 import jakarta.persistence.EntityManager;
@@ -21,7 +24,10 @@ public class ProductService {
 
 	@Autowired
 	ProductRepo productRepo;
-	
+
+    @Autowired
+    CompanyRepo companyRepo;
+
 	@Autowired
 	EntityManager entityManager;
 	
@@ -62,9 +68,17 @@ public class ProductService {
 		return productRepo.findByCategory(category);
 	}
 	
-	public String addProduct(Product product) {
-		productRepo.save(product); 
-		return "Added Product Successfully";
+	public String addProduct(ProductDTO productDTO) {
+	    	Long company_id = productDTO.getCompany_id();
+            if(companyRepo.findById(company_id).isEmpty()){
+                return "Could Not Add Product, Company Not Found";
+            }
+            Product product = ProductConverter.toProduct(productDTO);
+            product.setCompany(companyRepo.findById(company_id).get());
+            product.setUsers(new ArrayList<>());
+            product.setReviews(new ArrayList<>());
+            productRepo.save(product);
+            return "Product Added Successfully";
 	}
 	
 	public void deleteProduct(long id) {

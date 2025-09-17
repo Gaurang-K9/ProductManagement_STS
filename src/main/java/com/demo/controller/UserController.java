@@ -1,5 +1,6 @@
 package com.demo.controller;
 
+import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserResponseDTO;
 import com.demo.service.UserService;
@@ -37,6 +38,11 @@ public class UserController {
     public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO){
         String response = userService.addUser(userDTO);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/review")
+    public ResponseEntity<String> addReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO){
+        String response = userService.addReview(id, reviewDTO);
     }
 
     @DeleteMapping("/delete/{id}")

@@ -1,7 +1,9 @@
-package com.demo.model;
+package com.demo.model.Product;
 
 import java.util.List;
 
+import com.demo.model.company.Company;
+import com.demo.model.review.Review;
 import com.demo.model.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -26,10 +28,10 @@ import lombok.NoArgsConstructor;
 public class Product {
 	
 	@Id
-	private long product_id;
+	private Long product_id;
 	private String product;
 	private String category;
-	private double price;
+	private Double price;
 	@ManyToOne
 	@JoinColumn(name = "company_id")
 	@JsonBackReference
