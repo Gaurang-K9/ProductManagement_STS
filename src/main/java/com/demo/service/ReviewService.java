@@ -28,6 +28,9 @@ public class ReviewService {
     }
 
     public String deleteReviewById(long id){
+        if(reviewRepo.findById(id).isEmpty()){
+            return "Could Not Locate Resource";
+        }
         reviewRepo.deleteById(id);
         return "Review deleted successfully";
     }

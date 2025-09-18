@@ -6,18 +6,12 @@ import java.util.Optional;
 
 import com.demo.model.Product.ProductConverter;
 import com.demo.model.Product.ProductDTO;
-import com.demo.repo.CompanyRepo;
+import com.demo.model.Product.ProductResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.demo.model.Product.Product;
 import com.demo.repo.ProductRepo;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 
 @Service
 public class ProductService {
@@ -26,91 +20,63 @@ public class ProductService {
 	ProductRepo productRepo;
 
     @Autowired
-    CompanyRepo companyRepo;
-
-	@Autowired
-	EntityManager entityManager;
-	
-	public List<Product> findProductByNameOrCategory(String product, String category) {
-	    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-	    CriteriaQuery<Product> query = cb.createQuery(Product.class);
-	    Root<Product> root = query.from(Product.class);
-
-	    List<Predicate> predicates = new ArrayList<>();
-
-	    if (product != null && !product.isEmpty()) {
-	        predicates.add(cb.equal(root.get("product"), product));
-	    }
-
-	    if (category != null && !category.isEmpty()) {
-	        predicates.add(cb.equal(root.get("category"), category));
-	    }
-
-	    if (!predicates.isEmpty()) {
-	        Predicate[] predicateArray = predicates.toArray(new Predicate[0]);
-	        query.select(root).where(cb.or(predicateArray));
-	    } else {
-	        query.select(root);
-	    }
-
-	    return entityManager.createQuery(query).getResultList();
-	}
+    CompanyService companyService;
 
 	public Optional<Product> findProductById(long id) {
 		return productRepo.findById(id);
 	}
-	
+
 	public List<Product> findAllProducts(){
 		return productRepo.findAll();
 	}
-	
+
 	public List<Product> findByCategory(String category){
 		return productRepo.findByCategory(category);
 	}
 	
 	public String addProduct(ProductDTO productDTO) {
 	    	Long company_id = productDTO.getCompany_id();
-            if(companyRepo.findById(company_id).isEmpty()){
+            if(companyService.findCompanyById(company_id).isEmpty()){
                 return "Could Not Add Product, Company Not Found";
             }
             Product product = ProductConverter.toProduct(productDTO);
-            product.setCompany(companyRepo.findById(company_id).get());
+            product.setCompany(companyService.findCompanyById(company_id).get());
             product.setUsers(new ArrayList<>());
             product.setReviews(new ArrayList<>());
             productRepo.save(product);
             return "Product Added Successfully";
 	}
 	
-	public void deleteProduct(long id) {
-		productRepo.deleteById(id);
+	public String deleteProduct(long id) {
+		if(productRepo.findById(id).isEmpty()){
+            return "Could Not Locate Resource";
+        }
+        productRepo.deleteById(id);
+        return "Product Removed successfully";
 	}
 	
-	public String updateProduct(Product product, long up_id) {
+	public String updateProduct(ProductResponseDTO productDTO) {
 		
-		Product old = productRepo.findById(up_id).orElse(null);
+		Product old = productRepo.findById(productDTO.getProduct_id()).orElse(null);
 	
 		if(old != null) {
 			
-			if(product.getProduct() != null) {
-				old.setProduct(product.getProduct());
+			if(productDTO.getProduct() != null) {
+				old.setProduct(productDTO.getProduct());
 			}
 			
-			if(product.getCategory() != null) {
-				old.setCategory(product.getCategory());
+			if(productDTO.getCategory() != null) {
+				old.setCategory(productDTO.getCategory());
 			}
 			
-			if(product.getPrice() != 0.0) {
-				old.setPrice(product.getPrice());
+			if(productDTO.getPrice() != 0.0) {
+				old.setPrice(productDTO.getPrice());
 			}
-			
-			if(product.getCompany() != null) {
-				old.setCompany(product.getCompany());
-			}
-			
+
 			productRepo.save(old);
 			return "Updated Product Successfully";
 		}
-		
+
 		return "Could Not Locate Resource";
 	}
 }

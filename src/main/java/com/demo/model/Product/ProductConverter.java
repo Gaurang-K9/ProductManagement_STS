@@ -9,4 +9,13 @@ public class ProductConverter {
         product.setPrice(productDTO.getPrice());
         return product;
     }
+
+    public static ProductResponseDTO toProductResponseDTO(Product product){
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
+        productResponseDTO.setProduct_id(product.getProduct_id());
+        productResponseDTO.setProduct(product.getProduct());
+        productResponseDTO.setCategory(product.getCategory());
+        productResponseDTO.setPrice(product.getPrice());
+        return productResponseDTO;
+    }
 }
