@@ -15,6 +15,6 @@ public class UserResponseDTO {
 
     private String username;
     private String email;
-    private List<Product> wishlist;
-    private List<Review> reviews;
+    private List<String> wishlist;
+    private List<String> reviews;
 }

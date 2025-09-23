@@ -6,8 +6,13 @@ import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.User;
 import com.demo.model.user.UserConverter;
 import com.demo.model.user.UserDTO;
+import com.demo.model.user.UserLoginDTO;
 import com.demo.repo.UserRepo;
+import com.demo.service.auth.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +31,13 @@ public class UserService {
     @Autowired
     ReviewService reviewService;
 
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    @Autowired
+    AuthenticationManager authManager;
+
+    @Autowired
+    JWTService jwtService;
+
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     public List<User> findAllUsers() {
         return userRepo.findAll();
@@ -36,15 +47,14 @@ public class UserService {
         return userRepo.findById(id);
     }
 
-    public String addUser(UserDTO userDTO){
-        User user = userRepo.findByUsername(userDTO.getUsername());
-        if(!user.getUsername().isEmpty()){
-            return "Cannot Add Username "+user.getUsername()+" already exists";
+    public String register(UserDTO userDTO){
+        boolean response = userRepo.existsByUsername(userDTO.getUsername());
+        if(response){
+            return "Cannot Register Username "+userDTO.getUsername()+" already exists";
         }
         User saveUser = UserConverter.toUser(userDTO);
-        saveUser.setPassword(encoder.encode(userDTO.getPassword()));
-        userRepo.save(saveUser);
-        return "User added successfully";
+        saveUser(saveUser);
+        return "User Registered successfully";
     }
 
     public String deleteUser(Long id){
@@ -65,5 +75,44 @@ public class UserService {
         review.setProduct_review(productService.findProductById(productId).get());
         review.setUser(userRepo.findById(id).get());
         return reviewService.addReview(review);
+    }
+
+    public void saveUser(User user){
+        user.setPassword(encoder.encode(user.getPassword()));
+        userRepo.save(user);
+    }
+
+    public String updateUser(UserDTO updatedDto, Long userid){
+        Optional<User> optional = userRepo.findById(userid);
+        if(optional.isEmpty()){
+            return  "Could Not Locate Resource";
+        }
+        User updateUser = optional.get();
+        boolean isSameUsername = (updateUser.getUsername().contentEquals(updatedDto.getUsername()));//True for no username change and false for username change
+        boolean sameExists = userRepo.existsByUsername(updatedDto.getUsername());   //For changed username ideally should false
+                                                                                    //If true same name exists in database and should not update
+        if(!isSameUsername && sameExists){
+            return  "Cannot Update Username "+updatedDto.getUsername()+" already exists";
+        }
+        else if(!sameExists){
+            updateUser.setUsername(updatedDto.getUsername());
+            updateUser.setEmail(updatedDto.getEmail());
+            updateUser.setPassword(updatedDto.getPassword());
+            saveUser(updateUser);
+            return "User Updated Successfully";
+        }
+        updateUser.setEmail(updatedDto.getEmail());
+        updateUser.setPassword(updatedDto.getPassword());
+        saveUser(updateUser);
+        return "User Updated Successfully";
+    }
+
+    public String login(UserLoginDTO loginDTO) {
+        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword()));
+
+        if(!authentication.isAuthenticated()){
+            return "Could Not Login User. Try Again";
+        }
+        return jwtService.generateJWTToken(loginDTO.getUsername());
     }
 }

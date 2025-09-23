@@ -1,6 +1,7 @@
 package com.demo.model.user;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UserConverter {
 
@@ -20,8 +21,12 @@ public class UserConverter {
         UserResponseDTO userResponseDTO = new UserResponseDTO();
         userResponseDTO.setUsername(user.getUsername());
         userResponseDTO.setEmail(user.getEmail());
-        userResponseDTO.setWishlist(user.getWishlist());
-        userResponseDTO.setReviews(user.getReviews());
+        List<String> wishlist = new ArrayList<>();
+        List<String> reviews = new ArrayList<>();
+        user.getReviews().forEach(review -> reviews.add(review.getReview()));
+        user.getWishlist().forEach( product -> wishlist.add(product.getProduct()));
+        userResponseDTO.setWishlist(wishlist);
+        userResponseDTO.setReviews(reviews);
         return userResponseDTO;
     }
 }

@@ -37,13 +37,24 @@ public class UserController {
         return optional.map(user -> new ResponseEntity<>(UserConverter.toUserResponseDTO(user), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(new UserResponseDTO(), HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("/add")
+    @PostMapping("/add")    //For Testing
     public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO){
-        String response = userService.addUser(userDTO);
+        String response = userService.register(userDTO);
         if(response.startsWith("C")){
             return new ResponseEntity<>(response, HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<String> updateUser(@RequestBody UserDTO updatedDTO, @RequestParam Long userid){
+        String response = userService.updateUser(updatedDTO, userid);
+        if(response.startsWith("Co")){
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        } else if (response.startsWith("Ca")) {
+            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/{id}/review")
