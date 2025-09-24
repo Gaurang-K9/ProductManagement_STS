@@ -34,4 +34,8 @@ public class ReviewService {
         reviewRepo.deleteById(id);
         return "Review deleted successfully";
     }
+
+    public List<Review> findReviewsByProductId(Long productId) {
+        return reviewRepo.findByProductReview_ProductId(productId);
+    }
 }

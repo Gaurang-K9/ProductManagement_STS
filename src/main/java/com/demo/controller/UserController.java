@@ -6,12 +6,12 @@ import com.demo.model.user.UserConverter;
 import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserResponseDTO;
 import com.demo.service.UserService;
+import com.demo.service.auth.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,11 +23,12 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    UserAuthService userAuthService;
+
     @GetMapping("/all")
     public ResponseEntity<List<UserResponseDTO>> findAllUsers(){
-        List<User> list = userService.findAllUsers();
-        List<UserResponseDTO> userList = new ArrayList<>();
-        list.forEach(single -> userList.add(UserConverter.toUserResponseDTO(single)));
+        List<UserResponseDTO> userList = UserConverter.toUserResponseList(userService.findAllUsers());
         return new ResponseEntity<>(userList, HttpStatus.OK);
     }
 
@@ -39,7 +40,7 @@ public class UserController {
 
     @PostMapping("/add")    //For Testing
     public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO){
-        String response = userService.register(userDTO);
+        String response = userAuthService.register(userDTO);
         if(response.startsWith("C")){
             return new ResponseEntity<>(response, HttpStatus.CONFLICT);
         }

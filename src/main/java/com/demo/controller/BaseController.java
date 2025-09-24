@@ -3,6 +3,7 @@ package com.demo.controller;
 import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserLoginDTO;
 import com.demo.service.UserService;
+import com.demo.service.auth.UserAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ import java.io.IOException;
 public class BaseController {
 
     @Autowired
-    UserService userService;
+    UserAuthService userService;
 
     @RequestMapping(value = {"/", "/?continue"})
     public void sendRedirect(HttpServletResponse httpServletResponse) throws IOException {

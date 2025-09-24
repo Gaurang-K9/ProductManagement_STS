@@ -11,8 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 public class CompanyResponseDTO {
 
-    private Long company_id;
+    private Long companyId;
     private String company;
     private List<String> products;
-    private String company_type;
+    private String companyType;
 }

@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +20,11 @@ public class ReviewController {
     ReviewService reviewService;
 
     @GetMapping("/reviews")
-    public ResponseEntity<List<ReviewResponseDTO>> findAllReviews(){
-        List<Review> list = reviewService.findAllReviews();
-        List<ReviewResponseDTO> reviews = new ArrayList<>();
-        list.forEach(single -> reviews.add(ReviewConverter.toReviewResponseDTO(single)));
+    public ResponseEntity<List<ReviewResponseDTO>> findAllReviews(@RequestParam (required = false) Long productId){
+        if(productId != null){
+            List<ReviewResponseDTO> reviews = ReviewConverter.toReviewResponseList(reviewService.findReviewsByProductId(productId));
+        }
+        List<ReviewResponseDTO> reviews = ReviewConverter.toReviewResponseList(reviewService.findAllReviews());
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 

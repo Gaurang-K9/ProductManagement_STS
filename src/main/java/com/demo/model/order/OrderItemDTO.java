@@ -1,4 +1,4 @@
-package com.demo.model.review;
+package com.demo.model.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReviewDTO {
+public class OrderItemDTO {
 
     private Long productId;
-    private String review;
-    private Short star;
+    private Integer quantity;
 }

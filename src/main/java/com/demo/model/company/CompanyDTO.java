@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CompanyDTO {
 
-    private Long company_id;
+    private Long companyId;
     private String company;
-    private String company_type;
+    private String companyType;
 }

@@ -26,7 +26,7 @@ public class CompanyService {
 	}
 	
 	public List<Company> findCompanyByType(String company_type){
-		return companyRepo.findCompanyByType(company_type);
+		return companyRepo.findByCompanyType(company_type);
 	}
 	
 //	public List<Company> findCompanyByNameOrType(String company, String company_type){
@@ -52,7 +52,7 @@ public class CompanyService {
 	}
 	
 	public String updateProduct(CompanyDTO companyDTO) {
-		Company old = companyRepo.findById(companyDTO.getCompany_id()).orElse(null);
+		Company old = companyRepo.findById(companyDTO.getCompanyId()).orElse(null);
 		
 		if(old != null) {
 			
@@ -60,8 +60,8 @@ public class CompanyService {
 				old.setCompany(companyDTO.getCompany());
 			}
 			
-			if(companyDTO.getCompany_type() != null) {
-				old.setCompany_type(companyDTO.getCompany_type());
+			if(companyDTO.getCompanyType() != null) {
+				old.setCompanyType(companyDTO.getCompanyType());
 			}
 
             companyRepo.save(old);

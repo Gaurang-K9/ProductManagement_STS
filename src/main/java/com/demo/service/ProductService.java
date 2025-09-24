@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,9 +34,21 @@ public class ProductService {
 	public List<Product> findByCategory(String category){
 		return productRepo.findByCategory(category);
 	}
-	
+
+    public List<Product> findProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+        return productRepo.findByPriceBetween(minPrice, maxPrice);
+    }
+
+    public List<Product> findProductsByStarMoreThan(Short star){
+        return productRepo.findDistinctByReviews_StarGreaterThan(star);
+    }
+
+    public List<Product> findProductsById(List<Long> productIds){
+        return productRepo.findAllById(productIds);
+    }
+
 	public String addProduct(ProductDTO productDTO) {
-	    	Long company_id = productDTO.getCompany_id();
+	    	Long company_id = productDTO.getCompanyId();
             if(companyService.findCompanyById(company_id).isEmpty()){
                 return "Could Not Add Product, Company Not Found";
             }
@@ -57,7 +70,7 @@ public class ProductService {
 	
 	public String updateProduct(ProductResponseDTO productDTO) {
 		
-		Product old = productRepo.findById(productDTO.getProduct_id()).orElse(null);
+		Product old = productRepo.findById(productDTO.getProductId()).orElse(null);
 	
 		if(old != null) {
 			
@@ -69,7 +82,7 @@ public class ProductService {
 				old.setCategory(productDTO.getCategory());
 			}
 			
-			if(productDTO.getPrice() != 0.0) {
+			if(productDTO.getPrice() != null && productDTO.getPrice().compareTo(BigDecimal.ZERO) != 0) {
 				old.setPrice(productDTO.getPrice());
 			}
 

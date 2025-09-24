@@ -1,6 +1,6 @@
 package com.demo.controller;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,17 +25,13 @@ public class ProductController {
 
 	@GetMapping("/products")
 	public ResponseEntity<List<ProductResponseDTO>> findAllProducts(){
-		List<Product> list = productService.findAllProducts();
-		List<ProductResponseDTO> products = new ArrayList<>();
-        list.forEach(single -> products.add(ProductConverter.toProductResponseDTO(single)));
-		return new ResponseEntity<>(products, HttpStatus.OK);
+		List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findAllProducts());
+        return new ResponseEntity<>(products, HttpStatus.OK);
 	}
 	
 	@GetMapping("/products/{category}")
 	public ResponseEntity<List<ProductResponseDTO>> findByCategory(@PathVariable String category){
-		List<Product> list = productService.findByCategory(category);
-        List<ProductResponseDTO> products = new ArrayList<>();
-        list.forEach(single -> products.add(ProductConverter.toProductResponseDTO(single)));
+        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findByCategory(category));
         return new ResponseEntity<>(products, HttpStatus.OK);
 	}
 	
@@ -43,6 +39,18 @@ public class ProductController {
 	public ResponseEntity<ProductResponseDTO> findProductById(@PathVariable long id){
 		Optional<Product> product = productService.findProductById(id);
         return product.map(value -> new ResponseEntity<>(ProductConverter.toProductResponseDTO(value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(new ProductResponseDTO(), HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/product/price")
+    public ResponseEntity<List<ProductResponseDTO>> findProductsInPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max){
+        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findProductsInPriceRange(min, max));
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
+
+    @GetMapping("/product/stars")
+    public ResponseEntity<List<ProductResponseDTO>> findProductsByStarsMoreThan(@RequestParam Short s){
+        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findProductsByStarMoreThan(s));
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
 	@PostMapping("/product")

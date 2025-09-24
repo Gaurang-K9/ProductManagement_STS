@@ -21,12 +21,12 @@ import lombok.NoArgsConstructor;
 public class Company {
 	
 	@Id
-	private Long company_id;
+	private Long companyId;
 	private String company;
 	@OneToMany(mappedBy = "company",cascade = {CascadeType.ALL}, orphanRemoval = true)
 	@JsonManagedReference
 	private List<Product> products;
-	private String company_type;
+	private String companyType;
 	
 	public void addProduct(Product product) {
 		if(products == null) {

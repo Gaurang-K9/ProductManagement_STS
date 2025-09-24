@@ -29,4 +29,11 @@ public class UserConverter {
         userResponseDTO.setReviews(reviews);
         return userResponseDTO;
     }
+
+    public static List<UserResponseDTO> toUserResponseList(List<User> users){
+
+        List<UserResponseDTO> dtosList = new ArrayList<>();
+        users.forEach(user -> dtosList.add(toUserResponseDTO(user)));
+        return dtosList;
+    }
 }

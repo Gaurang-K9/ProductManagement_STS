@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReviewResponseDTO {
 
-    private Long review_id;
+    private Long reviewId;
     private String username;
     private String review;
+    private Short star;
 }

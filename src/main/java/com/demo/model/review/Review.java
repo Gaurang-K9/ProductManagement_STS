@@ -16,13 +16,14 @@ public class Review {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long review_id;
+	private Long reviewId;
 	@ManyToOne
     @JsonBackReference
 	private User user;
 	@ManyToOne
 	@JoinColumn(name = "product_id")
 	@JsonBackReference
-	private Product product_review;
+	private Product productReview;
 	private String review;
+    private Short star;
 }

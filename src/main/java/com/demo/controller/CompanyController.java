@@ -33,9 +33,9 @@ public class CompanyController {
 		return new ResponseEntity<>(companyList, HttpStatus.OK);
 	}
 	
-	@GetMapping("/type/{company_type}")
-	public ResponseEntity<List<CompanyDTO>> findByCompanyType(@PathVariable String company_type){
-		List<Company> list = companyService.findCompanyByType(company_type);
+	@GetMapping("/type/{companyType}")
+	public ResponseEntity<List<CompanyDTO>> findCompanyByType(@PathVariable String companyType){
+		List<Company> list = companyService.findCompanyByType(companyType);
         List<CompanyDTO> companyList = new ArrayList<>();
         list.forEach(company -> companyList.add(CompanyConverter.toCompanyDTO(company)));
         return new ResponseEntity<>(companyList, HttpStatus.OK);
