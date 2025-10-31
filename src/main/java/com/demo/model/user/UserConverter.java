@@ -13,6 +13,7 @@ public class UserConverter {
         user.setPassword(userDTO.getPassword());
         user.setWishlist(new ArrayList<>());
         user.setReviews(new ArrayList<>());
+        user.setAddresses(new ArrayList<>());
         return user;
     }
 
@@ -24,7 +25,7 @@ public class UserConverter {
         List<String> wishlist = new ArrayList<>();
         List<String> reviews = new ArrayList<>();
         user.getReviews().forEach(review -> reviews.add(review.getReview()));
-        user.getWishlist().forEach( product -> wishlist.add(product.getProduct()));
+        user.getWishlist().forEach( product -> wishlist.add(product.getProductName()));
         userResponseDTO.setWishlist(wishlist);
         userResponseDTO.setReviews(reviews);
         return userResponseDTO;
@@ -35,5 +36,12 @@ public class UserConverter {
         List<UserResponseDTO> dtosList = new ArrayList<>();
         users.forEach(user -> dtosList.add(toUserResponseDTO(user)));
         return dtosList;
+    }
+
+    public static UserCartDTO toUserCartDTO(User user){
+        UserCartDTO userCartDTO = new UserCartDTO();
+        userCartDTO.setUsername(user.getUsername());
+        userCartDTO.setEmail(user.getEmail());
+        return userCartDTO;
     }
 }

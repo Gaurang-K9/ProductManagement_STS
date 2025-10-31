@@ -1,10 +1,11 @@
 package com.demo.service;
 
 import com.demo.model.Address.Address;
-import com.demo.repo.AddressRepo;
+import com.demo.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,72 +13,76 @@ import java.util.Optional;
 public class AddressService {
 
     @Autowired
-    AddressRepo addressRepo;
+    UserService userService;
 
-    public List<Address> findAllAddress(){
-        return addressRepo.findAll();
-    }
-
-    public Optional<Address> findAddressById(Long id){
-        return addressRepo.findById(id);
-    }
-
-    public List<Address> findAddressByPincode(String pincode){
-        return addressRepo.findByPincode(pincode);
-    }
-
-    public List<Address> findAddressByCity(String city){
-        return addressRepo.findByCity(city);
-    }
-
-    public Address addAddress(Address address){
-        return addressRepo.save(address);
-    }
-
-    public String deleteAddressById(Long id){
-        Optional<Address> optional = addressRepo.findById(id);
+    public List<Address> findUserAddresses(Long userId){
+        Optional<User> optional = userService.findUserById(userId);
         if(optional.isEmpty()){
-            return "Could Not Locate Resource";
+            return new ArrayList<>();
         }
-        addressRepo.deleteById(id);
-        return "Address Removed Successfully";
+        User user = optional.get();
+        return user.getAddresses();
     }
 
-    public String updateAddress(Long id, Address updatedAddress) {
-        Optional<Address> optional = addressRepo.findById(id);
+    public String addAddressToUser(Long userId, Address address){
+        Optional<User> optional = userService.findUserById(userId);
         if(optional.isEmpty()){
-            return "Could Not Locate Resource";
+            return "Could Not Locate Resource: User";
         }
-        Address address = optional.get();
+        User user = optional.get();
+        user.getAddresses().add(address);
+        return "Address Added Successfully";
+    }
 
-        address.setStreetAddress(updatedAddress.getStreetAddress());
-        address.setPincode(updatedAddress.getPincode());
-        address.setCity(updatedAddress.getCity());
-        address.setState(updatedAddress.getState());
-        addressRepo.save(address);
+    public String updateUserAddress(Long userId, Integer addressIndex, Address address){
+        Optional<User> optional = userService.findUserById(userId);
+        if(optional.isEmpty()){
+            return "Could Not Locate Resource: User";
+        }
+        User user = optional.get();
+        if(addressIndex < 0 || addressIndex >= user.getAddresses().size()){
+            return "Could Not Locate Resource: Address";
+        }
+        user.getAddresses().set(addressIndex, address);
+        userService.saveUser(user);
         return "Address Updated Successfully";
     }
 
-    public String patchAddress(Long id, Address updatedFields) {
-        Optional<Address> optional = addressRepo.findById(id);
+    public String deleteUserAddress(Long userId, Integer addressIndex){
+        Optional<User> optional = userService.findUserById(userId);
         if(optional.isEmpty()){
-            return "Could Not Locate Resource";
+            return "Could Not Locate Resource: User";
         }
-        Address address = optional.get();
+        User user = optional.get();
+        if(addressIndex < 0 || addressIndex >= user.getAddresses().size()){
+            return "Could Not Locate Resource: Address";
+        }
+        user.getAddresses().remove(addressIndex.intValue());
+        userService.saveUser(user);
+        return "Address Removed Successfully";
+    }
 
-        if (updatedFields.getStreetAddress() != null) {
-            address.setStreetAddress(updatedFields.getStreetAddress());
+    public String patchUserAddress(Long userId,Integer addressIndex, Address address){
+        Optional<User> optional = userService.findUserById(userId);
+        if(optional.isEmpty()){
+            return "Could Not Locate Resource: User";
         }
-        if (updatedFields.getCity() != null) {
-            address.setCity(updatedFields.getCity());
+        User user = optional.get();
+        if(addressIndex < 0 || addressIndex >= user.getAddresses().size()){
+            return "Could Not Locate Resource: Address";
         }
-        if (updatedFields.getState() != null) {
-            address.setState(updatedFields.getState());
-        }
-        if (updatedFields.getPincode() != null) {
-            address.setPincode(updatedFields.getPincode());
-        }
-        addressRepo.save(address);
+        Address updatedAddress = user.getAddresses().get(addressIndex);
+
+        updatedAddress.setPincode(address.getPincode());
+
+        if(address.getStreetAddress() != null) updatedAddress.setStreetAddress(address.getStreetAddress());
+
+        if(address.getCity() != null) updatedAddress.setCity(address.getCity());
+
+        if(address.getState() != null) updatedAddress.setState(address.getState());
+
+        user.getAddresses().set(addressIndex, updatedAddress);
+        userService.saveUser(user);
         return "Address Updated Successfully";
     }
 }

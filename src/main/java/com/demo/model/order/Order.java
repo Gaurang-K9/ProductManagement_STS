@@ -18,7 +18,9 @@ import java.util.List;
 public class Order {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true, nullable = false)
     private String orderId;
     @ManyToOne
     private User user;
@@ -28,4 +30,6 @@ public class Order {
     @Embedded
     private OrderAddress orderAddress;
     private BigDecimal total;
+    @Enumerated
+    private OrderStatus orderStatus;
 }

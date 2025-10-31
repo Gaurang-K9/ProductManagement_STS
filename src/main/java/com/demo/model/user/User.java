@@ -2,6 +2,7 @@ package com.demo.model.user;
 
 import java.util.List;
 
+import com.demo.model.Address.Address;
 import com.demo.model.Product.Product;
 import com.demo.model.review.Review;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -32,4 +33,11 @@ public class User {
 	@OneToMany
     @JsonManagedReference
 	private List<Review> reviews;
+    @ElementCollection
+    @CollectionTable(
+            name = "user_addresses",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @OrderColumn(name = "address_index")
+    private List<Address> addresses;
 }

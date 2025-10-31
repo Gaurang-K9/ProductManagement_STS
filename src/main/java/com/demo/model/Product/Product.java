@@ -23,8 +23,8 @@ public class Product {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long productId;
-	private String product;
+    private Long productId;
+	private String productName;
 	private String category;
 	private BigDecimal price;
 	@ManyToOne

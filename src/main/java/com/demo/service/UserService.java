@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import com.demo.model.Address.Address;
 import com.demo.model.review.Review;
 import com.demo.model.review.ReviewConverter;
 import com.demo.model.review.ReviewDTO;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +37,18 @@ public class UserService {
         return userRepo.findById(id);
     }
 
+    public Boolean findUserExistsById(Long id){
+        return userRepo.existsById(id);
+    }
+
+    public List<User> findUserByPincode(String pincode){
+        return userRepo.findByAddresses_Pincode(pincode);
+    }
+
+    public void saveUser(User user){
+        userRepo.save(user);
+    }
+
     public String deleteUser(Long id){
         if(userRepo.findById(id).isEmpty()){
             return "Could not locate resource";
@@ -46,13 +60,21 @@ public class UserService {
     public String addUserReview(Long id, ReviewDTO reviewDTO) {
         Long productId = reviewDTO.getProductId();
         if(userRepo.findById(id).isEmpty() || productService.findProductById(productId).isEmpty()){
-            return "Could not locate resource";
+            return "Could Not Locate Resource";
         }
 
         Review review = ReviewConverter.toReview(reviewDTO);
         review.setProductReview(productService.findProductById(productId).get());
         review.setUser(userRepo.findById(id).get());
         return reviewService.addReview(review);
+    }
+
+    public String updateUserReview(Long userId, Long reviewId, ReviewDTO reviewDTO){
+        Long productId = reviewDTO.getProductId();
+        if(userRepo.findById(userId).isEmpty() || productService.findProductById(productId).isEmpty()){
+            return "Could Not Locate Resource";
+        }
+        return reviewService.updateReview(reviewId ,reviewDTO);
     }
 
     public String updateUser(UserDTO updatedDto, Long userid){
@@ -78,5 +100,50 @@ public class UserService {
         updateUser.setPassword(encoder.encode(updatedDto.getPassword()));
         userRepo.save(updateUser);
         return "User Updated Successfully";
+    }
+
+    public String addAddress(Long id, Address address){
+        Optional<User> optional = userRepo.findById(id);
+        if(optional.isEmpty()){
+            return "Could Not Locate Resource: User";
+        }
+        User user = optional.get();
+        if(user.getAddresses().isEmpty()){
+            user.setAddresses(new ArrayList<>());
+        }
+        user.getAddresses().add(address);
+        userRepo.save(user);
+        return "Address Added Successfully";
+    }
+
+    public String updateAddress(Long id, Integer addIndex ,Address address){
+        Optional<User> optional = userRepo.findById(id);
+        if(optional.isEmpty()){
+            return "Could Not Locate Resource: User";
+        }
+        User user = optional.get();
+        List<Address> addressList = user.getAddresses();
+        if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
+            return "Could Not Locate Resource: Address";
+        }
+        addressList.set(addIndex, address);
+        user.setAddresses(addressList);
+        userRepo.save(user);
+        return "Address Updated Successfully";
+    }
+
+    public String removeAddress(Long id, Integer addIndex){
+        Optional<User> optional = userRepo.findById(id);
+        if(optional.isEmpty()){
+            return "Could Not Locate Resource: User";
+        }
+        User user = optional.get();
+        List<Address> addressList = user.getAddresses();
+        if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
+            return "Could Not Locate Resource: Address";
+        }
+        addressList.remove((int) addIndex);
+        userRepo.save(user);
+        return "Address Removed Successfully";
     }
 }

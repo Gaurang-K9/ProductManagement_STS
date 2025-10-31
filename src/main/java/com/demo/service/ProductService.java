@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import com.demo.model.Product.ProductConverter;
 import com.demo.model.Product.ProductDTO;
-import com.demo.model.Product.ProductResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,14 +67,14 @@ public class ProductService {
         return "Product Removed successfully";
 	}
 	
-	public String updateProduct(ProductResponseDTO productDTO) {
+	public String updateProduct(Long id ,ProductDTO productDTO) {
 		
-		Product old = productRepo.findById(productDTO.getProductId()).orElse(null);
+		Product old = productRepo.findById(id).orElse(null);
 	
 		if(old != null) {
 			
-			if(productDTO.getProduct() != null) {
-				old.setProduct(productDTO.getProduct());
+			if(productDTO.getProductName() != null) {
+				old.setProductName(productDTO.getProductName());
 			}
 			
 			if(productDTO.getCategory() != null) {

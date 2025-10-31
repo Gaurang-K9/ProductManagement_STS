@@ -1,5 +1,6 @@
 package com.demo.controller;
 
+import com.demo.model.Address.Address;
 import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.User;
 import com.demo.model.user.UserConverter;
@@ -68,9 +69,56 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PutMapping("/{userid}/review/{reviewid}")
+    public ResponseEntity<String> updateReview(@PathVariable Long userid, @PathVariable Long reviewid, @RequestBody ReviewDTO reviewDTO){
+        String response = userService.updateUserReview(userid, reviewid, reviewDTO);
+
+        if(response.startsWith("C")){
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id){
         String response = userService.deleteUser(id);
+        if(response.startsWith("C")){
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/address")
+    public ResponseEntity<List<Address>> findUserAddress(@PathVariable Long id){
+        Optional<User> optional = userService.findUserById(id);
+        if(optional.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        List<Address> addresses = optional.get().getAddresses();
+        return ResponseEntity.ok(addresses);
+    }
+
+    @PostMapping("/{id}/address")
+    public ResponseEntity<String> addAddress(@RequestBody Address address, @PathVariable Long id){
+        String response = userService.addAddress(id, address);
+        if(response.startsWith("C")){
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}/address/{index}")
+    public ResponseEntity<String> updateAddress(@RequestBody Address address, @PathVariable Long id, @PathVariable Integer index){
+        String response = userService.updateAddress(id, index, address);
+        if(response.startsWith("C")){
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}/address/{index}")
+    public ResponseEntity<String> removeAddress(@PathVariable Long id, @PathVariable Integer index){
+        String response = userService.removeAddress(id, index);
         if(response.startsWith("C")){
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }

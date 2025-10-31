@@ -7,7 +7,7 @@ public class ProductConverter {
 
     public static Product toProduct(ProductDTO productDTO){
         Product product = new Product();
-        product.setProduct(productDTO.getProduct());
+        product.setProductName(productDTO.getProductName());
         product.setCategory(productDTO.getCategory());
         product.setPrice(productDTO.getPrice());
         return product;
@@ -16,7 +16,7 @@ public class ProductConverter {
     public static ProductResponseDTO toProductResponseDTO(Product product){
         ProductResponseDTO productResponseDTO = new ProductResponseDTO();
         productResponseDTO.setProductId(product.getProductId());
-        productResponseDTO.setProduct(product.getProduct());
+        productResponseDTO.setProductName(product.getProductName());
         productResponseDTO.setCategory(product.getCategory());
         productResponseDTO.setPrice(product.getPrice());
         return productResponseDTO;

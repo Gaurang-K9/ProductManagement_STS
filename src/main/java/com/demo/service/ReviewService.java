@@ -1,6 +1,7 @@
 package com.demo.service;
 
 import com.demo.model.review.Review;
+import com.demo.model.review.ReviewDTO;
 import com.demo.repo.ReviewRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,18 @@ public class ReviewService {
         return "Review added successfully";
     }
 
-    public String deleteReviewById(long id){
+    public String updateReview(Long id, ReviewDTO reviewDTO){
+        if(reviewRepo.findById(id).isEmpty()){
+            return "Could Not Locate Resource";
+        }
+        Review oldReview = reviewRepo.findById(id).get();
+        oldReview.setReview(reviewDTO.getReview());
+        oldReview.setStar(reviewDTO.getStar());
+        reviewRepo.save(oldReview);
+        return "Review updated successfully";
+    }
+
+    public String deleteReviewById(Long id){
         if(reviewRepo.findById(id).isEmpty()){
             return "Could Not Locate Resource";
         }

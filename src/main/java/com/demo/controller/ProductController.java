@@ -63,8 +63,8 @@ public class ProductController {
 	}
 	
 	@PutMapping("/product/{id}")
-	public ResponseEntity<String> updateProduct(@RequestBody ProductResponseDTO product){
-		String response = productService.updateProduct(product);
+	public ResponseEntity<String> updateProduct(@PathVariable long id ,@RequestBody ProductDTO product){
+		String response = productService.updateProduct(id, product);
 		
 		if(response.startsWith("C")) {
 			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
