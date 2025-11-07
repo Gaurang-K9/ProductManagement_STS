@@ -1,6 +1,8 @@
 package com.demo.service;
 
+import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.Address.Address;
+import com.demo.model.Product.Product;
 import com.demo.model.review.Review;
 import com.demo.model.review.ReviewConverter;
 import com.demo.model.review.ReviewDTO;
@@ -33,8 +35,9 @@ public class UserService {
         return userRepo.findAll();
     }
 
-    public Optional<User> findUserById(Long id){
-        return userRepo.findById(id);
+    public User findUserById(Long id){
+        return userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
     }
 
     public Boolean findUserExistsById(Long id){
@@ -50,44 +53,41 @@ public class UserService {
     }
 
     public String deleteUser(Long id){
-        if(userRepo.findById(id).isEmpty()){
-            return "Could not locate resource";
-        }
-        userRepo.deleteById(id);
+        User user = userRepo.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+        userRepo.delete(user);
         return "User deleted successfully";
     }
 
     public String addUserReview(Long id, ReviewDTO reviewDTO) {
         Long productId = reviewDTO.getProductId();
-        if(userRepo.findById(id).isEmpty() || productService.findProductById(productId).isEmpty()){
-            return "Could Not Locate Resource";
-        }
-
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+        Product product = productService.findProductById(productId);
         Review review = ReviewConverter.toReview(reviewDTO);
-        review.setProductReview(productService.findProductById(productId).get());
-        review.setUser(userRepo.findById(id).get());
+        review.setProductReview(product);
+        review.setUser(user);
         return reviewService.addReview(review);
     }
 
     public String updateUserReview(Long userId, Long reviewId, ReviewDTO reviewDTO){
-        Long productId = reviewDTO.getProductId();
-        if(userRepo.findById(userId).isEmpty() || productService.findProductById(productId).isEmpty()){
-            return "Could Not Locate Resource";
+        if (!userRepo.existsById(userId)) {
+            throw new ResourceNotFoundException(User.class, "userId", userId);
         }
-        return reviewService.updateReview(reviewId ,reviewDTO);
+        Review review = reviewService.findReviewById(reviewId);
+        review.setReview(reviewDTO.getReview());
+        review.setStar(reviewDTO.getStar());
+        return reviewService.updateReview(review);
     }
 
-    public String updateUser(UserDTO updatedDto, Long userid){
-        Optional<User> optional = userRepo.findById(userid);
-        if(optional.isEmpty()){
-            return  "Could Not Locate Resource";
-        }
-        User updateUser = optional.get();
+    public String updateUser(UserDTO updatedDto, Long userId){
+        User updateUser = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
         boolean isSameUsername = (updateUser.getUsername().contentEquals(updatedDto.getUsername()));//True for no username change and false for username change
         boolean sameExists = userRepo.existsByUsername(updatedDto.getUsername());//For changed username ideally should false
         //If true same name exists in database and should not update
         if(!isSameUsername && sameExists){
-            return  "Cannot Update Username "+updatedDto.getUsername()+" already exists";
+            return "Cannot Update Username "+updatedDto.getUsername()+" already exists";
         }
         else if(!sameExists){
             updateUser.setUsername(updatedDto.getUsername());
@@ -103,11 +103,8 @@ public class UserService {
     }
 
     public String addAddress(Long id, Address address){
-        Optional<User> optional = userRepo.findById(id);
-        if(optional.isEmpty()){
-            return "Could Not Locate Resource: User";
-        }
-        User user = optional.get();
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
         if(user.getAddresses().isEmpty()){
             user.setAddresses(new ArrayList<>());
         }
@@ -117,14 +114,11 @@ public class UserService {
     }
 
     public String updateAddress(Long id, Integer addIndex ,Address address){
-        Optional<User> optional = userRepo.findById(id);
-        if(optional.isEmpty()){
-            return "Could Not Locate Resource: User";
-        }
-        User user = optional.get();
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
         List<Address> addressList = user.getAddresses();
         if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
-            return "Could Not Locate Resource: Address";
+            throw new ResourceNotFoundException(Address.class, "addressIndex", addIndex);
         }
         addressList.set(addIndex, address);
         user.setAddresses(addressList);
@@ -133,14 +127,11 @@ public class UserService {
     }
 
     public String removeAddress(Long id, Integer addIndex){
-        Optional<User> optional = userRepo.findById(id);
-        if(optional.isEmpty()){
-            return "Could Not Locate Resource: User";
-        }
-        User user = optional.get();
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
         List<Address> addressList = user.getAddresses();
         if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
-            return "Could Not Locate Resource: Address";
+            throw new ResourceNotFoundException(Address.class, "addressIndex", addIndex);
         }
         addressList.remove((int) addIndex);
         userRepo.save(user);

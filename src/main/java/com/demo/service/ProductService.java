@@ -3,10 +3,11 @@ package com.demo.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.Product.ProductConverter;
 import com.demo.model.Product.ProductDTO;
+import com.demo.model.company.Company;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +23,9 @@ public class ProductService {
     @Autowired
     CompanyService companyService;
 
-	public Optional<Product> findProductById(long id) {
-		return productRepo.findById(id);
+	public Product findProductById(Long id) {
+		return productRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
 	}
 
 	public List<Product> findAllProducts(){
@@ -47,48 +49,39 @@ public class ProductService {
     }
 
 	public String addProduct(ProductDTO productDTO) {
-	    	Long company_id = productDTO.getCompanyId();
-            if(companyService.findCompanyById(company_id).isEmpty()){
-                return "Could Not Add Product, Company Not Found";
-            }
+	    	Long companyId = productDTO.getCompanyId();
+            Company company = companyService.findCompanyById(companyId);
             Product product = ProductConverter.toProduct(productDTO);
-            product.setCompany(companyService.findCompanyById(company_id).get());
+            product.setCompany(company);
             product.setUsers(new ArrayList<>());
             product.setReviews(new ArrayList<>());
             productRepo.save(product);
             return "Product Added Successfully";
 	}
 	
-	public String deleteProduct(long id) {
-		if(productRepo.findById(id).isEmpty()){
-            return "Could Not Locate Resource";
-        }
-        productRepo.deleteById(id);
-        return "Product Removed successfully";
+	public String deleteProduct(Long id) {
+		Product product = productRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
+        productRepo.delete(product);
+        return "Product Deleted Successfully";
 	}
 	
 	public String updateProduct(Long id ,ProductDTO productDTO) {
 		
-		Product old = productRepo.findById(id).orElse(null);
-	
-		if(old != null) {
-			
+		Product oldProduct = productRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
+
 			if(productDTO.getProductName() != null) {
-				old.setProductName(productDTO.getProductName());
+				oldProduct.setProductName(productDTO.getProductName());
 			}
-			
 			if(productDTO.getCategory() != null) {
-				old.setCategory(productDTO.getCategory());
+				oldProduct.setCategory(productDTO.getCategory());
 			}
-			
 			if(productDTO.getPrice() != null && productDTO.getPrice().compareTo(BigDecimal.ZERO) != 0) {
-				old.setPrice(productDTO.getPrice());
+				oldProduct.setPrice(productDTO.getPrice());
 			}
 
-			productRepo.save(old);
-			return "Updated Product Successfully";
-		}
-
-		return "Could Not Locate Resource";
+        productRepo.save(oldProduct);
+		return "Updated Product Successfully";
 	}
 }

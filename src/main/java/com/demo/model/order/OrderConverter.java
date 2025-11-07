@@ -14,6 +14,7 @@ public class OrderConverter {
         responseDTO.setOrderTime(order.getOrderTime());
         responseDTO.setShippingAddress(order.getOrderAddress());
         responseDTO.setTotal(order.getTotal());
+        responseDTO.setOrderStatus(order.getOrderStatus());
         return responseDTO;
     }
 }

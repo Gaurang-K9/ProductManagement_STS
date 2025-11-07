@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cart")
@@ -31,45 +31,35 @@ public class CartController {
 
     @GetMapping("/user/{id}")
     public ResponseEntity<CartDTO> findCartByUserId(@PathVariable Long id){
-         boolean response = userService.findUserExistsById(id);
-         if(!response){
-             return new ResponseEntity<>(new CartDTO(), HttpStatus.NOT_FOUND);
-         }
-         Optional<Cart> optional = cartService.findCartByUserId(id);
-         if(optional.isEmpty()){
-             return new ResponseEntity<>(new CartDTO(), HttpStatus.OK);
-         }
-         CartDTO cart = CartConverter.toCartDTO(optional.get());
-         return new ResponseEntity<>(cart, HttpStatus.OK);
+         Cart cart = cartService.findCartByUserId(id);
+         CartDTO cartDTO = CartConverter.toCartDTO(cart);
+         return ResponseEntity.status(HttpStatus.OK).body(cartDTO);
     }
 
     @DeleteMapping("/{id}/empty")
-    public ResponseEntity<String> emptyCartById(@PathVariable Long id){
+    public ResponseEntity<Map <String, String>> emptyCartById(@PathVariable Long id){
         String response = cartService.emptyCart(id);
-        if(response.startsWith("Co")){
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<String> addItemsToCart(@RequestBody List<OrderItemDTO> items, @PathVariable Long id){
+    public ResponseEntity<Map <String, String>> addItemsToCart(@RequestBody List<OrderItemDTO> items, @PathVariable Long id){
         String response = cartService.addItemsToCart(items, id);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @PostMapping("/user/{id}")
-    public ResponseEntity<String> addItemsToCartByUserId(@RequestBody List<OrderItemDTO> items, @PathVariable Long id){
+    public ResponseEntity<Map <String, String>> addItemsToCartByUserId(@RequestBody List<OrderItemDTO> items, @PathVariable Long id){
         String response = cartService.addItemsToCartByUserId(items, id);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @PostMapping("/user/{userid}/cart/{cartid}/order")
     public ResponseEntity<OrderResponseDTO> placeCartToOrder(@PathVariable Long userid, @PathVariable Long cartid){
-        if (!userService.findUserExistsById(userid)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        User user = userService.findUserById(userid).get();
+        User user = userService.findUserById(userid);
         List<CartItem> cartItems = cartService.findCartItemsByCartId(cartid);
 
         if (cartItems.isEmpty()) {
@@ -92,6 +82,6 @@ public class CartController {
         Order order = orderService.createOrder(userid, orderItems, shippingAddress);
         OrderResponseDTO orderResponseDTO = OrderConverter.toOrderResponseDTO(order);
         cartService.emptyCart(cartid);
-        return new ResponseEntity<>(orderResponseDTO, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDTO);
     }
 }

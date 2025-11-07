@@ -3,6 +3,7 @@ package com.demo.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.company.CompanyConverter;
 import com.demo.model.company.CompanyDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,9 @@ public class CompanyService {
 	@Autowired
 	CompanyRepo companyRepo;
 		
-	public Optional<Company> findCompanyById(long id){
-		return companyRepo.findById(id);
+	public Company findCompanyById(Long id){
+        return companyRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Company.class, "companyId", id));
 	}
 	
 	public List<Company> findAllCompanies(){
@@ -43,31 +45,27 @@ public class CompanyService {
 		return "Added Company Successfully";
 	}
 	
-	public String deleteCompany(long id) {
-		if(companyRepo.findById(id).isEmpty()){
-            return "Could Not Locate Resource";
-        }
-        companyRepo.deleteById(id);
+	public String deleteCompany(Long id) {
+        Company company = companyRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Company.class, "companyId", id));
+
+        companyRepo.delete(company);
         return "Company Removed Successfully";
 	}
 	
-	public String updateProduct(CompanyDTO companyDTO) {
-		Company old = companyRepo.findById(companyDTO.getCompanyId()).orElse(null);
-		
-		if(old != null) {
-			
-			if(companyDTO.getCompany() != null) {
-				old.setCompany(companyDTO.getCompany());
-			}
-			
-			if(companyDTO.getCompanyType() != null) {
-				old.setCompanyType(companyDTO.getCompanyType());
-			}
+	public String updateCompany(CompanyDTO companyDTO) {
+        Long companyId = companyDTO.getCompanyId();
+		Company oldCompany = companyRepo.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException(Company.class, "companyId", companyId));
 
-            companyRepo.save(old);
+			if(companyDTO.getCompany() != null) {
+				oldCompany.setCompany(companyDTO.getCompany());
+			}
+			if(companyDTO.getCompanyType() != null) {
+				oldCompany.setCompanyType(companyDTO.getCompanyType());
+			}
+            companyRepo.save(oldCompany);
             return "Updated Company Successfully";
-        }
-        return "Could Not Locate Resource";
     }
 
 }

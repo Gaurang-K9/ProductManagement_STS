@@ -2,6 +2,7 @@ package com.demo.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.demo.model.Product.ProductConverter;
@@ -25,61 +26,58 @@ public class ProductController {
 
 	@GetMapping("/products")
 	public ResponseEntity<List<ProductResponseDTO>> findAllProducts(){
-		List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findAllProducts());
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<Product> productList = productService.findAllProducts();
+		List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
+        return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 	
 	@GetMapping("/products/{category}")
 	public ResponseEntity<List<ProductResponseDTO>> findByCategory(@PathVariable String category){
-        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findByCategory(category));
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<Product> productList = productService.findByCategory(category);
+        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
+        return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 	
-	@GetMapping("/product/{id}")
-	public ResponseEntity<ProductResponseDTO> findProductById(@PathVariable long id){
-		Optional<Product> product = productService.findProductById(id);
-        return product.map(value -> new ResponseEntity<>(ProductConverter.toProductResponseDTO(value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(new ProductResponseDTO(), HttpStatus.NOT_FOUND));
+	@GetMapping("/products/{id}")
+	public ResponseEntity<ProductResponseDTO> findProductById(@PathVariable Long id){
+		Product product = productService.findProductById(id);
+        ProductResponseDTO responseDTO = ProductConverter.toProductResponseDTO(product);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @GetMapping("/product/price")
+    @GetMapping("/products/price")
     public ResponseEntity<List<ProductResponseDTO>> findProductsInPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max){
-        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findProductsInPriceRange(min, max));
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<Product> productList = productService.findProductsInPriceRange(min, max);
+        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
+        return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 
-    @GetMapping("/product/stars")
+    @GetMapping("/products/stars")
     public ResponseEntity<List<ProductResponseDTO>> findProductsByStarsMoreThan(@RequestParam Short s){
-        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productService.findProductsByStarMoreThan(s));
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<Product> productList = productService.findProductsByStarMoreThan(s);
+        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
+        return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 
 	@PostMapping("/product")
-	public ResponseEntity<String> addProduct(@RequestBody ProductDTO productDTO){
+	public ResponseEntity<Map<String, String>> addProduct(@RequestBody ProductDTO productDTO){
 		String response = productService.addProduct(productDTO);
-		if(response.startsWith("C")){
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		Map<String, String> body = Map.of("response", response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
 	
-	@PutMapping("/product/{id}")
-	public ResponseEntity<String> updateProduct(@PathVariable long id ,@RequestBody ProductDTO product){
+	@PutMapping("/products/{id}")
+	public ResponseEntity<Map<String, String>> updateProduct(@PathVariable Long id ,@RequestBody ProductDTO product){
 		String response = productService.updateProduct(id, product);
-		
-		if(response.startsWith("C")) {
-			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-		}
-		
-		return new ResponseEntity<>(response, HttpStatus.OK);
+        Map<String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 	
-	@DeleteMapping("/product/{id}")
-	public ResponseEntity<String> deleteProduct(@PathVariable long id) {
+	@DeleteMapping("/products/{id}")
+	public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable long id) {
 		String response = productService.deleteProduct(id);
-		if(response.startsWith("C")) {
-			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(response, HttpStatus.OK);
+        Map<String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 
 }

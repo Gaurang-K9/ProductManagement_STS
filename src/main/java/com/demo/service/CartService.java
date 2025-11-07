@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.Product.Product;
 import com.demo.model.cart.Cart;
 import com.demo.model.cart.CartItem;
@@ -24,25 +25,26 @@ public class CartService {
     @Autowired
     ProductService productService;
 
-    public Optional<Cart> findCartByUserId(Long userId) {
-        return cartRepo.findByUser_UserId(userId);
+    public Cart findCartByUserId(Long userId) {
+        return cartRepo.findByUser_UserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
     }
 
     public List<CartItem> findCartItemsByUserId(Long userId) {
         Cart cart = cartRepo.findByUser_UserId(userId)
-                .orElseThrow(() -> new RuntimeException("No cart found for user: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException(Cart.class, "userId", userId));
         return cart.getCartItems();
     }
 
     public List<CartItem> findCartItemsByCartId(Long cartId){
         Cart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("No cart found for id: " + cartId));
+                .orElseThrow(() -> new ResourceNotFoundException(Cart.class, "cartId", cartId));
         return cart.getCartItems();
     }
 
     private void addProductToCart(Cart cart, OrderItemDTO cartItem) {
-        Product product = productService.findProductById(cartItem.getProductId())
-                .orElseThrow(() -> new RuntimeException("Invalid ProductId: " + cartItem.getProductId()));
+        Long productId = cartItem.getProductId();
+        Product product = productService.findProductById(productId);
         cart.addOrUpdateItem(product, cartItem.getQuantity());
     }
 
@@ -57,7 +59,8 @@ public class CartService {
 
     public String addItemsToCart(List<OrderItemDTO> productQty, Long cartId) {
         Cart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Could Not Locate Resource: Cart"));
+                .orElseThrow(() -> new ResourceNotFoundException(Cart.class, "cartId", cartId));
+                        //RuntimeException("Could Not Locate Resource: Cart"));
 
         for (OrderItemDTO item : productQty) {
             addProductToCart(cart, item);
@@ -68,8 +71,7 @@ public class CartService {
 
     public String emptyCart(Long cartId) {
         Cart cart = cartRepo.findById(cartId)
-                .orElseThrow(() -> new RuntimeException("Could Not Locate Resource: Cart"));
-
+                .orElseThrow(() -> new ResourceNotFoundException(Cart.class, "cartId", cartId));
         if (cart.isEmpty()) {
             return "Cart is already empty";
         }
@@ -85,9 +87,7 @@ public class CartService {
     }
 
     private Cart createNewCartForUser(Long userId) {
-        User user = userService.findUserById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-
+        User user = userService.findUserById(userId);
         Cart newCart = new Cart();
         newCart.setUser(user);
         return cartRepo.save(newCart);

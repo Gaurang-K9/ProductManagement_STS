@@ -20,4 +20,5 @@ public class OrderResponseDTO {
     private LocalDateTime orderTime;
     private OrderAddress shippingAddress;
     private BigDecimal total;
+    private OrderStatus orderStatus;
 }

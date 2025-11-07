@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import com.demo.model.company.Company;
 import com.demo.service.CompanyService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,18 +26,20 @@ public class CompanyController {
 	
 	@GetMapping("/all")
 	public ResponseEntity<List<CompanyDTO>> findAllCompanies(){
-		List<Company> list = companyService.findAllCompanies();
-		List<CompanyDTO> companyList = new ArrayList<>();
-        list.forEach(company -> companyList.add(CompanyConverter.toCompanyDTO(company)));
-		return new ResponseEntity<>(companyList, HttpStatus.OK);
+        List<CompanyDTO> companyList = companyService.findAllCompanies()
+                                        .stream()
+                                        .map(CompanyConverter::toCompanyDTO)
+                                        .toList();
+		return ResponseEntity.status(HttpStatus.OK).body(companyList);
 	}
 	
 	@GetMapping("/type/{companyType}")
 	public ResponseEntity<List<CompanyDTO>> findCompanyByType(@PathVariable String companyType){
-		List<Company> list = companyService.findCompanyByType(companyType);
-        List<CompanyDTO> companyList = new ArrayList<>();
-        list.forEach(company -> companyList.add(CompanyConverter.toCompanyDTO(company)));
-        return new ResponseEntity<>(companyList, HttpStatus.OK);
+        List<CompanyDTO> companyList = companyService.findCompanyByType(companyType)
+                                        .stream()
+                                        .map(CompanyConverter::toCompanyDTO)
+                                        .toList();
+        return ResponseEntity.status(HttpStatus.OK).body(companyList);
 	}
 	
 //	@GetMapping("/fetch")
@@ -51,35 +52,30 @@ public class CompanyController {
 //	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<CompanyResponseDTO> findCompanyById(@PathVariable long id){
-		Optional<Company> company = companyService.findCompanyById(id);
-
-        return company.map(value -> new ResponseEntity<>(CompanyConverter.toCompanyResponseDTO(value), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(new CompanyResponseDTO(), HttpStatus.NOT_FOUND));
+	public ResponseEntity<CompanyResponseDTO> findCompanyById(@PathVariable Long id){
+		Company company = companyService.findCompanyById(id);
+        CompanyResponseDTO companyResponseDTO = CompanyConverter.toCompanyResponseDTO(company);
+        return ResponseEntity.status(HttpStatus.OK).body(companyResponseDTO);
     }
 	
 	@PostMapping("/add")
-	public ResponseEntity<String> addCompany(@RequestBody CompanyDTO company){
+	public ResponseEntity<Map<String, String>> addCompany(@RequestBody CompanyDTO company){
 		String response = companyService.addCompany(company);
-		
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+        Map<String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<String> updateCompany(@RequestBody CompanyDTO company){
-		String response = companyService.updateProduct(company);
-		if(response.startsWith("C")) {
-			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-		}
-
-		return new ResponseEntity<>(response, HttpStatus.OK);
+	public ResponseEntity<Map<String, String>> updateCompany(@RequestBody CompanyDTO company){
+		String response = companyService.updateCompany(company);
+        Map<String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteCompany(@PathVariable long id){
+	public ResponseEntity<Map<String, String>> deleteCompany(@PathVariable long id){
 		String response = companyService.deleteCompany(id);
-        if(response.startsWith("Cou")){
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        Map<String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 }

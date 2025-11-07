@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.review.Review;
 import com.demo.model.review.ReviewDTO;
 import com.demo.repo.ReviewRepo;
@@ -19,8 +20,9 @@ public class ReviewService {
         return reviewRepo.findAll();
     }
 
-    public Optional<Review> findReviewById(Long id){
-        return reviewRepo.findById(id);
+    public Review findReviewById(Long id){
+        return reviewRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
     }
 
     public String addReview(Review review){
@@ -28,11 +30,14 @@ public class ReviewService {
         return "Review added successfully";
     }
 
+    public String updateReview(Review review){
+        reviewRepo.save(review);
+        return "Review Updated Successfully";
+    }
+
     public String updateReview(Long id, ReviewDTO reviewDTO){
-        if(reviewRepo.findById(id).isEmpty()){
-            return "Could Not Locate Resource";
-        }
-        Review oldReview = reviewRepo.findById(id).get();
+        Review oldReview = reviewRepo.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
         oldReview.setReview(reviewDTO.getReview());
         oldReview.setStar(reviewDTO.getStar());
         reviewRepo.save(oldReview);
@@ -40,10 +45,9 @@ public class ReviewService {
     }
 
     public String deleteReviewById(Long id){
-        if(reviewRepo.findById(id).isEmpty()){
-            return "Could Not Locate Resource";
-        }
-        reviewRepo.deleteById(id);
+        Review review = reviewRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
+        reviewRepo.delete(review);
         return "Review deleted successfully";
     }
 

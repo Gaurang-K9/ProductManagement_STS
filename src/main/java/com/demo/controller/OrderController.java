@@ -19,39 +19,22 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> findOrderItemsById(@PathVariable Long id){
-        Optional<Order> optional = orderService.findOrderById(id);
-        if(optional.isEmpty()){
-            return new ResponseEntity<>(new OrderResponseDTO(), HttpStatus.NOT_FOUND);
-        }
-        OrderResponseDTO order =  OrderConverter.toOrderResponseDTO(optional.get());
-        return new ResponseEntity<>(order, HttpStatus.OK);
+        Order order = orderService.findOrderById(id);
+        OrderResponseDTO responseDTO =  OrderConverter.toOrderResponseDTO(order);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
-
-//    @PostMapping("/test")
-//    public ResponseEntity<CreateOrderRequest> testCreateOrder(@org.springframework.web.bind.annotation.RequestBody CreateOrderRequest request){
-//        //System.out.println("testRequest: "+request);
-//        System.out.println("ItemsDTO: "+request.getItems());
-//        System.out.println("ShippingAddress: "+request.getShippingAddress());
-//
-//        return new ResponseEntity<>(request, HttpStatus.OK);
-//    }
-//
-//    @PostMapping("/test-raw")
-//    public ResponseEntity<String> testRawString(@RequestBody String raw){
-//        return new ResponseEntity<>(raw, HttpStatus.OK);
-//    }
 
     @PostMapping("/user/{id}")
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody CreateOrderRequest request, @PathVariable Long id) {
         Order serviceOrder = orderService.createOrder(id, request.getItems(), request.getShippingAddress());
         OrderResponseDTO order = OrderConverter.toOrderResponseDTO(serviceOrder);
-        return new ResponseEntity<>(order, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
     @PutMapping("/{id}/address")
     public ResponseEntity<OrderResponseDTO> changeShippingAddress(@RequestBody OrderAddress shippingAddress, @PathVariable Long id){
         Order serviceOrder = orderService.changeShippingAddress(id, shippingAddress);
         OrderResponseDTO order = OrderConverter.toOrderResponseDTO(serviceOrder);
-        return new ResponseEntity<>(order, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(order);
     }
 }

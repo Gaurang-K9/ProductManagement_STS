@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -21,31 +22,35 @@ public class ReviewController {
 
     @GetMapping("/reviews")
     public ResponseEntity<List<ReviewResponseDTO>> findAllReviews(@RequestParam (required = false) Long productId){
+        List<Review> reviewList;
         if(productId != null){
-            List<ReviewResponseDTO> reviews = ReviewConverter.toReviewResponseList(reviewService.findReviewsByProductId(productId));
+            reviewList = reviewService.findReviewsByProductId(productId);
         }
-        List<ReviewResponseDTO> reviews = ReviewConverter.toReviewResponseList(reviewService.findAllReviews());
-        return new ResponseEntity<>(reviews, HttpStatus.OK);
+        else {
+            reviewList = reviewService.findAllReviews();
+        }
+        List<ReviewResponseDTO> reviews = ReviewConverter.toReviewResponseList(reviewList);
+        return ResponseEntity.status(HttpStatus.OK).body(reviews);
     }
 
     @GetMapping("/reviews/{id}")
     public ResponseEntity<ReviewResponseDTO> findReviewById(@PathVariable Long id){
-        Optional<Review> optional = reviewService.findReviewById(id);
-        return optional.map(review -> new ResponseEntity<>(ReviewConverter.toReviewResponseDTO(review), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(new ReviewResponseDTO(), HttpStatus.NOT_FOUND));
+        Review review = reviewService.findReviewById(id);
+        ReviewResponseDTO reviewResponseDTO = ReviewConverter.toReviewResponseDTO(review);
+        return ResponseEntity.status(HttpStatus.OK).body(reviewResponseDTO);
     }
 
-    @PostMapping("/review")
-    public ResponseEntity<String> addReview(@RequestBody Review review){
+    @PostMapping("/reviews")
+    public ResponseEntity<Map<String, String>> addReview(@RequestBody Review review){
         String response = reviewService.addReview(review);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        Map<String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @DeleteMapping("/review/{id}")
-    public ResponseEntity<String> deleteReviewById(@PathVariable Long id){
+    @DeleteMapping("/reviews/{id}")
+    public ResponseEntity<Map<String, String>> deleteReviewById(@PathVariable Long id){
         String response = reviewService.deleteReviewById(id);
-        if(response.startsWith("C")){
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        Map<String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class BaseController {
@@ -27,20 +29,26 @@ public class BaseController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> userlogin(@RequestBody UserLoginDTO loginDTO){
+    public ResponseEntity<Map<String, String>> userLogin(@RequestBody UserLoginDTO loginDTO){
         String response = userService.login(loginDTO);
+        Map<String, String> body = new HashMap<>();
         if(response.startsWith("C")){
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+            body.put("response", response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
         }
-        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+        body.put("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> userRegister(@RequestBody UserDTO userDTO){
+    public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserDTO userDTO){
         String response = userService.register(userDTO);
+        Map<String, String> body = new HashMap<>();
         if(response.startsWith("C")){
-            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+            body.put("response", response);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
         }
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        body.put("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 }
