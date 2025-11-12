@@ -21,7 +21,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, nullable = false)
-    private String orderId;
+    private String orderCode;
     @ManyToOne
     private User user;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

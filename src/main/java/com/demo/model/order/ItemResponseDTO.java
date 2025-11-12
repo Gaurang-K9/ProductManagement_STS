@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ItemResponseDTO {
 
-    private String orderId;
+    private String orderCode;
     private ProductResponseDTO product;
     private Integer quantity;
 }

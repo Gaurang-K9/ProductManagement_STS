@@ -4,7 +4,6 @@ import com.demo.model.payment.Payment;
 import com.demo.model.payment.PaymentConverter;
 import com.demo.model.payment.PaymentRequest;
 import com.demo.model.payment.PaymentResponseDTO;
-import com.demo.service.OrderService;
 import com.demo.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

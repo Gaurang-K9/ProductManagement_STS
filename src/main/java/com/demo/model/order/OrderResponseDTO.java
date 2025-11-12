@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderResponseDTO {
 
-    private String orderId;
+    private String orderCode;
     private String username;
     private String email;
     private List<ItemResponseDTO> items;

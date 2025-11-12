@@ -23,17 +23,6 @@ public class JWTService {
         secret_key = secretKey;
     }
 
-//    public String generateSecretKey(){
-//        try {
-//            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-//            SecretKey key = keyGenerator.generateKey();
-//            secret_key = Base64.getEncoder().encodeToString(key.getEncoded());
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new RuntimeException(e);
-//        }
-//        return secret_key;
-//    }
-
     public SecretKey generateKey(){
         byte[] keyBytes = Decoders.BASE64.decode(secret_key);
         return Keys.hmacShaKeyFor(keyBytes);

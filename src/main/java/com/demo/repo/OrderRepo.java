@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepo extends JpaRepository<Order, Long> {
@@ -24,4 +25,6 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     List<User> findDistinctUsersWithTotalGreaterThan(@Param("total") BigDecimal total);
 
     List<Order> findByOrderTimeBetween(LocalDateTime time1, LocalDateTime time2);
+
+    Optional<Order> findByOrderCode(String orderCode);
 }

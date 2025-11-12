@@ -51,8 +51,8 @@ public class OrderService {
         order.setItems(orderItems);
         order.setTotal(total);
         log.info("Order Total: {}", total);
-        String orderId = generateOrderId(order);
-        order.setOrderId(orderId);
+        String orderCode = generateOrderCode(order);
+        order.setOrderCode(orderCode);
         order.setOrderTime(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.CREATED);
         return orderRepo.save(order);
@@ -76,20 +76,25 @@ public class OrderService {
         return orderRepo.save(order);
     }
 
-    private String generateOrderId(Order order){
-        String orderId = "";
+    private String generateOrderCode(Order order){
+        String orderCode = "";
         String category = order.getItems().getFirst().getProduct().getCategory();
         String product = order.getItems().getFirst().getProduct().getProductName();
 
         category = (category.length() >= 3 ? category.substring(0,3) : category).toUpperCase();
         product = (product.length() >= 3 ? product.substring(0,3) : product).toUpperCase();
         long millis = System.currentTimeMillis();
-        orderId = category + product + millis;
-        return orderId;
+        orderCode = category + product + millis;
+        return orderCode;
     }
 
     public Order updateOrder(Order order){
         return orderRepo.save(order);
+    }
+
+    public Order findOrderByOrderCode(String orderCode){
+        return orderRepo.findByOrderCode(orderCode)
+                .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
     }
 
     public List<Order> findOrdersByPincode(String pincode) {
@@ -110,5 +115,17 @@ public class OrderService {
 
     public List<Order> findOrdersByPincodeAndTotalMoreThan(String pincode, BigDecimal total){
         return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total);
+    }
+
+    public Order cancelOrder(Long userId, String orderCode){
+        Order order = orderRepo.findByOrderCode(orderCode)
+                .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
+        User inputUser = userService.findUserById(userId);
+        User orderUser = order.getUser();
+        if(!inputUser.equals(orderUser)){
+            throw new IllegalArgumentException("Invalid userId for given order");
+        }
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        return orderRepo.save(order);
     }
 }

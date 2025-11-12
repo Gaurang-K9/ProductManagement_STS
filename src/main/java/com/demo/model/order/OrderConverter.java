@@ -6,7 +6,7 @@ public class OrderConverter {
 
     public static OrderResponseDTO toOrderResponseDTO(Order order){
         OrderResponseDTO responseDTO = new OrderResponseDTO();
-        responseDTO.setOrderId(order.getOrderId());
+        responseDTO.setOrderCode(order.getOrderCode());
         responseDTO.setUsername(order.getUser().getUsername());
         responseDTO.setEmail(order.getUser().getEmail());
         List<ItemResponseDTO> items = OrderItemConverter.toItemResponseDTO(order);

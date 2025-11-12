@@ -3,10 +3,8 @@ package com.demo.service;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.order.Order;
 import com.demo.model.order.OrderStatus;
-import com.demo.model.payment.Payment;
-import com.demo.model.payment.PaymentMethod;
-import com.demo.model.payment.PaymentRequest;
-import com.demo.model.payment.PaymentStatus;
+import com.demo.model.payment.*;
+import com.demo.repo.PaymentApiLogRepo;
 import com.demo.repo.PaymentRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +24,9 @@ public class PaymentService {
 
     @Autowired
     PaymentRepo paymentRepo;
+
+    @Autowired
+    PaymentApiLogRepo logRepository;
 
     @Autowired
     OrderService orderService;
@@ -53,6 +54,7 @@ public class PaymentService {
     }
 
     private PaymentStatus externalPaymentAPI(Payment payment){
+        String url = "https://jsonplaceholder.typicode.com/posts";
         try{
             RestTemplate restTemplate = new RestTemplate();
             Map<String, Object> request = new HashMap<>();
@@ -60,8 +62,15 @@ public class PaymentService {
             request.put("amount", payment.getOrder().getTotal());
             request.put("method", payment.getPaymentMethod());
 
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    "https://jsonplaceholder.typicode.com/posts", request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            PaymentApiLog apiLog = new PaymentApiLog();
+            apiLog.setTransactionId(payment.getTransactionId());
+            apiLog.setUrl(url);
+            apiLog.setRequestPayload(request.toString());
+            apiLog.setResponseBody(response.getBody());
+            apiLog.setResponseStatus(response.getStatusCode().value());
+            apiLog.setPayment(payment);
+            logRepository.save(apiLog);
 
             if(response.getStatusCode().is2xxSuccessful())
                 return PaymentStatus.SUCCESS;
@@ -69,6 +78,15 @@ public class PaymentService {
                 return PaymentStatus.FAILED;
         }
         catch(Exception e){
+            PaymentApiLog apiLog = new PaymentApiLog();
+            apiLog.setTransactionId(payment.getTransactionId());
+            apiLog.setUrl(url);
+            apiLog.setRequestPayload("Error while calling external payment API");
+            apiLog.setResponseBody(e.getMessage());
+            apiLog.setResponseStatus(500);
+            apiLog.setPayment(payment);
+            logRepository.save(apiLog);
+
             log.error("Error while calling external payment API for transactionId: {}", payment.getTransactionId(), e);
             return PaymentStatus.FAILED;
         }

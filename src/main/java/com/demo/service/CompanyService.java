@@ -1,7 +1,6 @@
 package com.demo.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.company.CompanyConverter;
@@ -30,15 +29,7 @@ public class CompanyService {
 	public List<Company> findCompanyByType(String company_type){
 		return companyRepo.findByCompanyType(company_type);
 	}
-	
-//	public List<Company> findCompanyByNameOrType(String company, String company_type){
-//		List<Company> list = companyRepo.findAll(
-//				Specification.where(CompanySpecification.hasCompany(company))
-//				.or(CompanySpecification.hasCompanyType(company_type))
-//				);
-//		return list;
-//	}
-	
+
 	public String addCompany(CompanyDTO companyDTO) {
         Company company = CompanyConverter.toCompany(companyDTO);
 		companyRepo.save(company);

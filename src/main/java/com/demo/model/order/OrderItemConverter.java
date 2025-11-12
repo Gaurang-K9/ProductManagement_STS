@@ -14,7 +14,7 @@ public class OrderItemConverter {
 
         for(int i=0; i<order.getItems().size(); i++){
             ItemResponseDTO item = new ItemResponseDTO();
-            item.setOrderId(order.getOrderId());
+            item.setOrderCode(order.getOrderCode());
             Product product = order.getItems().get(i).getProduct();
             ProductResponseDTO dto = ProductConverter.toProductResponseDTO(product);
             item.setProduct(dto);

@@ -45,11 +45,6 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-//        //daoAuthenticationProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
-//        daoAuthenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder(12));
-//        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-//        return daoAuthenticationProvider;
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder(12));
         return daoAuthenticationProvider;
@@ -60,28 +55,4 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-/*  This is the hard coded way to authorize any application and the withDefaultPasswordEncoder() method is deprecated
-    @Bean
-    public UserDetailsService userDetailsService(){
-
-        UserDetails user1 = User
-                .withDefaultPasswordEncoder()
-                .username("admin")
-                .password("admin@125")
-                .roles("ADMIN")
-                .build();
-
-        UserDetails user2 = User
-                .withDefaultPasswordEncoder()
-                .username("user")
-                .password("user@123")
-                .roles("USER")
-                .build();
-
-        List<UserDetails> userList = new ArrayList<>();
-        userList.add(user1);
-        userList.add(user2);
-        return new InMemoryUserDetailsManager(userList);
-    }
-*/
 }
