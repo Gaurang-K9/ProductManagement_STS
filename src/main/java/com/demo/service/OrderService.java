@@ -1,7 +1,7 @@
 package com.demo.service;
 
 import com.demo.exception.ResourceNotFoundException;
-import com.demo.model.Product.Product;
+import com.demo.model.product.Product;
 import com.demo.model.order.*;
 import com.demo.model.user.User;
 import com.demo.repo.OrderRepo;

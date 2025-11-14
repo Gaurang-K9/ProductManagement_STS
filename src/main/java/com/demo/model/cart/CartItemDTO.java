@@ -1,6 +1,6 @@
 package com.demo.model.cart;
 
-import com.demo.model.Product.ProductResponseDTO;
+import com.demo.model.product.ProductResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

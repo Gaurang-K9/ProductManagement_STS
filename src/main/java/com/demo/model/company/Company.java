@@ -3,7 +3,7 @@ package com.demo.model.company;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.demo.model.Product.Product;
+import com.demo.model.product.Product;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;

@@ -3,6 +3,9 @@ package com.demo.service;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.order.Order;
 import com.demo.model.order.OrderStatus;
+import com.demo.model.payment.Payment;
+import com.demo.model.payment.PaymentMethod;
+import com.demo.model.payment.PaymentStatus;
 import com.demo.model.shipment.Shipment;
 import com.demo.repo.ShipmentRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,9 @@ public class ShipmentService {
 
     @Autowired
     OrderService orderService;
+
+    @Autowired
+    PaymentService paymentService;
 
     private String generateTrackingId(String pincode){
         String date = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
@@ -68,8 +74,20 @@ public class ShipmentService {
         }
 
         Order order = shipment.getOrder();
-        if(order.getOrderStatus().equals(OrderStatus.CANCELLED)){
+        if(order.getOrderStatus() == OrderStatus.CANCELLED){
             throw new IllegalStateException("Cannot deliver cancelled order");
+        }
+
+        String orderCode = order.getOrderCode();
+        Payment payment = paymentService.findByOrderCode(orderCode);
+
+        if(payment.getPaymentMethod() == PaymentMethod.CASH_ON_DELIVERY){
+            payment.setPaymentStatus(PaymentStatus.SUCCESS);
+            payment.setPaidAt(LocalDateTime.now());
+            paymentService.updatePayment(payment);
+        }
+        else if(payment.getPaymentStatus() != PaymentStatus.SUCCESS){
+            throw new IllegalStateException("Cannot deliver unpaid order.");
         }
         order.setOrderStatus(OrderStatus.DELIVERED);
         return orderService.updateOrder(order);

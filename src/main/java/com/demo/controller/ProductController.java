@@ -4,15 +4,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import com.demo.model.Product.ProductConverter;
-import com.demo.model.Product.ProductDTO;
-import com.demo.model.Product.ProductResponseDTO;
+import com.demo.model.product.ProductConverter;
+import com.demo.model.product.ProductDTO;
+import com.demo.model.product.ProductResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.demo.model.Product.Product;
+import com.demo.model.product.Product;
 import com.demo.service.ProductService;
 
 @RestController

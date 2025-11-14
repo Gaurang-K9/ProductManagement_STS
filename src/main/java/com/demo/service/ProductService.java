@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.demo.exception.ResourceNotFoundException;
-import com.demo.model.Product.ProductConverter;
-import com.demo.model.Product.ProductDTO;
+import com.demo.model.product.ProductConverter;
+import com.demo.model.product.ProductDTO;
 import com.demo.model.company.Company;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.demo.model.Product.Product;
+import com.demo.model.product.Product;
 import com.demo.repo.ProductRepo;
 
 @Service
@@ -56,14 +56,14 @@ public class ProductService {
             product.setUsers(new ArrayList<>());
             product.setReviews(new ArrayList<>());
             productRepo.save(product);
-            return "Product Added Successfully";
+            return "product Added Successfully";
 	}
 	
 	public String deleteProduct(Long id) {
 		Product product = productRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
         productRepo.delete(product);
-        return "Product Deleted Successfully";
+        return "product Deleted Successfully";
 	}
 	
 	public String updateProduct(Long id ,ProductDTO productDTO) {
@@ -82,6 +82,6 @@ public class ProductService {
 			}
 
         productRepo.save(oldProduct);
-		return "Updated Product Successfully";
+		return "Updated product Successfully";
 	}
 }

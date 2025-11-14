@@ -1,6 +1,6 @@
 package com.demo.controller;
 
-import com.demo.model.Address.Address;
+import com.demo.model.address.Address;
 import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.User;
 import com.demo.model.user.UserConverter;

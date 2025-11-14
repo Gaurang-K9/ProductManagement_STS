@@ -1,6 +1,6 @@
 package com.demo.controller;
 
-import com.demo.model.Address.Address;
+import com.demo.model.address.Address;
 import com.demo.model.cart.*;
 import com.demo.model.order.*;
 import com.demo.model.user.User;

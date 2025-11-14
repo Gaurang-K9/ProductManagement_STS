@@ -1,6 +1,6 @@
 package com.demo.model.cart;
 
-import com.demo.model.Product.Product;
+import com.demo.model.product.Product;
 import com.demo.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 package com.demo.model.cart;
 
-import com.demo.model.Product.Product;
-import com.demo.model.Product.ProductConverter;
+import com.demo.model.product.Product;
+import com.demo.model.product.ProductConverter;
 import com.demo.model.order.OrderItemDTO;
 
 import java.util.ArrayList;

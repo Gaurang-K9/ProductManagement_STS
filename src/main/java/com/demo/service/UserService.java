@@ -1,8 +1,8 @@
 package com.demo.service;
 
 import com.demo.exception.ResourceNotFoundException;
-import com.demo.model.Address.Address;
-import com.demo.model.Product.Product;
+import com.demo.model.address.Address;
+import com.demo.model.product.Product;
 import com.demo.model.review.Review;
 import com.demo.model.review.ReviewConverter;
 import com.demo.model.review.ReviewDTO;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -110,7 +109,7 @@ public class UserService {
         }
         user.getAddresses().add(address);
         userRepo.save(user);
-        return "Address Added Successfully";
+        return "address Added Successfully";
     }
 
     public String updateAddress(Long id, Integer addIndex ,Address address){
@@ -123,7 +122,7 @@ public class UserService {
         addressList.set(addIndex, address);
         user.setAddresses(addressList);
         userRepo.save(user);
-        return "Address Updated Successfully";
+        return "address Updated Successfully";
     }
 
     public String removeAddress(Long id, Integer addIndex){
@@ -135,6 +134,6 @@ public class UserService {
         }
         addressList.remove((int) addIndex);
         userRepo.save(user);
-        return "Address Removed Successfully";
+        return "address Removed Successfully";
     }
 }

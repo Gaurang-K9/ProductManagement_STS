@@ -46,7 +46,6 @@ public class PaymentService {
         payment.setOrder(order);
         payment.setPaymentMethod(paymentRequest.getPaymentMethod());
         payment.setPaymentStatus(PaymentStatus.PENDING);
-        payment.setPaidAt(LocalDateTime.now());
         String txnId = createTransactionId(payment);
         payment.setTransactionId(txnId);
 
@@ -97,13 +96,38 @@ public class PaymentService {
                 .orElseThrow(() -> new ResourceNotFoundException(Payment.class, "orderId", orderId));
 
         Order order = orderService.findOrderById(orderId);
-        order.setOrderStatus(OrderStatus.PROCESSING);
-        orderService.updateOrder(order);
-        if(!payment.getPaymentMethod().equals(PaymentMethod.CASH_ON_DELIVERY)){
+        if(payment.getPaymentMethod() != PaymentMethod.CASH_ON_DELIVERY){
             PaymentStatus status = externalPaymentAPI(payment);
             payment.setPaymentStatus(status);
-            payment.setPaidAt(LocalDateTime.now());
         }
+        if(payment.getPaymentStatus() == PaymentStatus.SUCCESS || payment.getPaymentMethod() == PaymentMethod.CASH_ON_DELIVERY){
+            order.setOrderStatus(OrderStatus.PROCESSING);
+            orderService.updateOrder(order);
+
+            if(payment.getPaymentStatus() == PaymentStatus.SUCCESS) {
+                payment.setPaidAt(LocalDateTime.now());
+            }
+        }
+        return paymentRepo.save(payment);
+    }
+
+    public Payment findByTransactionId(String transactionId){
+        return paymentRepo.findByTransactionId(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException(Payment.class, "transactionId", transactionId));
+    }
+
+    public Payment findByPaymentId(Long paymentId){
+        return paymentRepo.findById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException(Payment.class, "paymentId", paymentId));
+    }
+
+    public Payment findByOrderCode(String orderCode){
+        return paymentRepo.findByOrder_OrderCode(orderCode)
+                .orElseThrow(() -> new ResourceNotFoundException(Payment.class, "orderCode", orderCode));
+    }
+
+
+    public Payment updatePayment(Payment payment){
         return paymentRepo.save(payment);
     }
 }

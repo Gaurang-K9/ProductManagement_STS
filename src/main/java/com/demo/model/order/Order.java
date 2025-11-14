@@ -30,6 +30,6 @@ public class Order {
     @Embedded
     private OrderAddress orderAddress;
     private BigDecimal total;
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 }

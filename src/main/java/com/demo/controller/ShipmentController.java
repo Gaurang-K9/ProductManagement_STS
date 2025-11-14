@@ -34,8 +34,8 @@ public class ShipmentController {
     }
 
     @PostMapping("/create/{orderid}")
-    public ResponseEntity<ShipmentResponseDTO> createShipment(@PathVariable Long orderId ,@RequestParam String courierName){
-        Shipment shipment = shipmentService.createShipment(orderId, courierName);
+    public ResponseEntity<ShipmentResponseDTO> createShipment(@PathVariable Long orderid ,@RequestParam String courierName){
+        Shipment shipment = shipmentService.createShipment(orderid, courierName);
         ShipmentResponseDTO responseDTO = ShipmentConverter.toShipmentResponseDTO(shipment);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }

@@ -2,8 +2,8 @@ package com.demo.model.user;
 
 import java.util.List;
 
-import com.demo.model.Address.Address;
-import com.demo.model.Product.Product;
+import com.demo.model.address.Address;
+import com.demo.model.product.Product;
 import com.demo.model.review.Review;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

@@ -1,8 +1,8 @@
 package com.demo.model.order;
 
-import com.demo.model.Product.Product;
-import com.demo.model.Product.ProductConverter;
-import com.demo.model.Product.ProductResponseDTO;
+import com.demo.model.product.Product;
+import com.demo.model.product.ProductConverter;
+import com.demo.model.product.ProductResponseDTO;
 
 import java.util.ArrayList;
 import java.util.List;
