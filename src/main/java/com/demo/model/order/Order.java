@@ -18,8 +18,10 @@ import java.util.List;
 public class Order {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String orderId;
+    @Column(unique = true, nullable = false)
+    private String orderCode;
     @ManyToOne
     private User user;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -28,4 +30,6 @@ public class Order {
     @Embedded
     private OrderAddress orderAddress;
     private BigDecimal total;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
 }

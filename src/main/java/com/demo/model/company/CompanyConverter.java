@@ -28,7 +28,7 @@ public class CompanyConverter {
         companyResponseDTO.setCompanyType(company.getCompanyType());
 
         List<String> products = new ArrayList<>();
-        company.getProducts().forEach(product -> products.add(product.getProduct()));
+        company.getProducts().forEach(product -> products.add(product.getProductName()));
         companyResponseDTO.setProducts(products);
 
         return companyResponseDTO;

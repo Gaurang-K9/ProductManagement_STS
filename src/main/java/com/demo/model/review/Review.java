@@ -1,6 +1,6 @@
 package com.demo.model.review;
 
-import com.demo.model.Product.Product;
+import com.demo.model.product.Product;
 import com.demo.model.user.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

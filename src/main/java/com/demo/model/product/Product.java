@@ -1,4 +1,4 @@
-package com.demo.model.Product;
+package com.demo.model.product;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,8 +23,8 @@ public class Product {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long productId;
-	private String product;
+    private Long productId;
+	private String productName;
 	private String category;
 	private BigDecimal price;
 	@ManyToOne

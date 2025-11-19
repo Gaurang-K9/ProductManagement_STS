@@ -1,5 +1,6 @@
 package com.demo.controller;
 
+import com.demo.model.address.Address;
 import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.User;
 import com.demo.model.user.UserConverter;
@@ -13,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -34,46 +35,71 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> findUserById(@PathVariable Long id){
-        Optional<User> optional = userService.findUserById(id);
-        return optional.map(user -> new ResponseEntity<>(UserConverter.toUserResponseDTO(user), HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(new UserResponseDTO(), HttpStatus.NOT_FOUND));
+        User user = userService.findUserById(id);
+        UserResponseDTO responseDTO = UserConverter.toUserResponseDTO(user);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @PostMapping("/add")    //For Testing
-    public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO){
+    public ResponseEntity<Map <String, String>> addUser(@RequestBody UserDTO userDTO){
         String response = userAuthService.register(userDTO);
-        if(response.startsWith("C")){
-            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String> updateUser(@RequestBody UserDTO updatedDTO, @RequestParam Long userid){
+    public ResponseEntity<Map <String, String>> updateUser(@RequestBody UserDTO updatedDTO, @RequestParam Long userid){
         String response = userService.updateUser(updatedDTO, userid);
-        if(response.startsWith("Co")){
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        } else if (response.startsWith("Ca")) {
-            return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
     @PostMapping("/{id}/review")
-    public ResponseEntity<String> addReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO){
+    public ResponseEntity<Map <String, String>> addReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO){
         String response = userService.addUserReview(id, reviewDTO);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
 
-        if(response.startsWith("C")){
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    @PutMapping("/{userid}/review/{reviewid}")
+    public ResponseEntity<Map <String, String>> updateReview(@PathVariable Long userid, @PathVariable Long reviewid, @RequestBody ReviewDTO reviewDTO){
+        String response = userService.updateUserReview(userid, reviewid, reviewDTO);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id){
+    public ResponseEntity<Map <String, String>> deleteUser(@PathVariable Long id){
         String response = userService.deleteUser(id);
-        if(response.startsWith("C")){
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+    @GetMapping("/{id}/address")
+    public ResponseEntity<List<Address>> findUserAddress(@PathVariable Long id){
+        User user = userService.findUserById(id);
+        List<Address> addresses = user.getAddresses();
+        return ResponseEntity.status(HttpStatus.OK).body(addresses);
+    }
+
+    @PostMapping("/{id}/address")
+    public ResponseEntity<Map <String, String>> addAddress(@RequestBody Address address, @PathVariable Long id){
+        String response = userService.addAddress(id, address);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
+
+    @PutMapping("/{id}/address/{index}")
+    public ResponseEntity<Map <String, String>> updateAddress(@RequestBody Address address, @PathVariable Long id, @PathVariable Integer index){
+        String response = userService.updateAddress(id, index, address);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+    @DeleteMapping("/{id}/address/{index}")
+    public ResponseEntity<Map <String, String>> removeAddress(@PathVariable Long id, @PathVariable Integer index){
+        String response = userService.removeAddress(id, index);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 }

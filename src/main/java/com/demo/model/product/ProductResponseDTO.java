@@ -1,4 +1,4 @@
-package com.demo.model.Product;
+package com.demo.model.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ProductDTO {
+@NoArgsConstructor
+public class ProductResponseDTO {
 
-    private String product;
+    private Long productId;
+    private String productName;
     private String category;
     private BigDecimal price;
-    private Long companyId;
 }

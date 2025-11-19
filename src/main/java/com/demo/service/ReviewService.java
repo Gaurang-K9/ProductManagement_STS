@@ -1,12 +1,13 @@
 package com.demo.service;
 
+import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.review.Review;
+import com.demo.model.review.ReviewDTO;
 import com.demo.repo.ReviewRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReviewService {
@@ -18,8 +19,9 @@ public class ReviewService {
         return reviewRepo.findAll();
     }
 
-    public Optional<Review> findReviewById(Long id){
-        return reviewRepo.findById(id);
+    public Review findReviewById(Long id){
+        return reviewRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
     }
 
     public String addReview(Review review){
@@ -27,11 +29,24 @@ public class ReviewService {
         return "Review added successfully";
     }
 
-    public String deleteReviewById(long id){
-        if(reviewRepo.findById(id).isEmpty()){
-            return "Could Not Locate Resource";
-        }
-        reviewRepo.deleteById(id);
+    public String updateReview(Review review){
+        reviewRepo.save(review);
+        return "Review Updated Successfully";
+    }
+
+    public String updateReview(Long id, ReviewDTO reviewDTO){
+        Review oldReview = reviewRepo.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
+        oldReview.setReview(reviewDTO.getReview());
+        oldReview.setStar(reviewDTO.getStar());
+        reviewRepo.save(oldReview);
+        return "Review updated successfully";
+    }
+
+    public String deleteReviewById(Long id){
+        Review review = reviewRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
+        reviewRepo.delete(review);
         return "Review deleted successfully";
     }
 

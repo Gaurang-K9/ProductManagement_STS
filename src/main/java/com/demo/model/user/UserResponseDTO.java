@@ -1,7 +1,5 @@
 package com.demo.model.user;
 
-import com.demo.model.Product.Product;
-import com.demo.model.review.Review;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
