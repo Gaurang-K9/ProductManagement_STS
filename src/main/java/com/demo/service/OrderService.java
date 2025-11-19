@@ -27,6 +27,9 @@ public class OrderService {
     @Autowired
     ProductService productService;
 
+    @Autowired
+    InventoryService inventoryService;
+
     public Order createOrder(Long userId, List<OrderItemDTO> itemDTOS, OrderAddress shippingAddress){
         User user = userService.findUserById(userId);
         BigDecimal total = BigDecimal.ZERO;
@@ -55,6 +58,7 @@ public class OrderService {
         order.setOrderCode(orderCode);
         order.setOrderTime(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.CREATED);
+        inventoryService.updateStockAndReserveQuantity(order);
         return orderRepo.save(order);
     }
 
@@ -126,6 +130,7 @@ public class OrderService {
             throw new IllegalArgumentException("Invalid userId for given order");
         }
         order.setOrderStatus(OrderStatus.CANCELLED);
+        inventoryService.updateStockAndReserveQuantity(order);
         return orderRepo.save(order);
     }
 }

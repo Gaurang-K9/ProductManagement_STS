@@ -27,6 +27,9 @@ public class ShipmentService {
     @Autowired
     PaymentService paymentService;
 
+    @Autowired
+    InventoryService inventoryService;
+
     private String generateTrackingId(String pincode){
         String date = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
         String timePart = String.valueOf(System.currentTimeMillis());
@@ -90,6 +93,7 @@ public class ShipmentService {
             throw new IllegalStateException("Cannot deliver unpaid order.");
         }
         order.setOrderStatus(OrderStatus.DELIVERED);
+        inventoryService.updateStockAndReserveQuantity(order);
         return orderService.updateOrder(order);
     }
 
