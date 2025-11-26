@@ -113,10 +113,6 @@ public class OrderService {
         return orderRepo.findByOrderTimeBetween(time1, time2);
     }
 
-    public List<User> findUsersWithTotalMoreThan(BigDecimal total){
-        return orderRepo.findDistinctUsersWithTotalGreaterThan(total);
-    }
-
     public List<Order> findOrdersByPincodeAndTotalMoreThan(String pincode, BigDecimal total){
         return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total);
     }
@@ -130,6 +126,22 @@ public class OrderService {
             throw new IllegalArgumentException("Invalid userId for given order");
         }
         order.setOrderStatus(OrderStatus.CANCELLED);
+        inventoryService.updateStockAndReserveQuantity(order);
+        return orderRepo.save(order);
+    }
+
+    public Order returnOrder(Long userId, String orderCode){
+        Order order = orderRepo.findByOrderCode(orderCode)
+                .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
+        User inputUser = userService.findUserById(userId);
+        User orderUser = order.getUser();
+        if(!inputUser.equals(orderUser)){
+            throw new IllegalArgumentException("Invalid userId for given order");
+        }
+        if(order.getOrderStatus() != OrderStatus.DELIVERED){
+            throw new IllegalArgumentException("Order has not been delivered");
+        }
+        order.setOrderStatus(OrderStatus.RETURNED);
         inventoryService.updateStockAndReserveQuantity(order);
         return orderRepo.save(order);
     }

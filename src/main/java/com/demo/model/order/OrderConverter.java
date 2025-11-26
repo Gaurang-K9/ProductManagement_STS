@@ -17,4 +17,20 @@ public class OrderConverter {
         responseDTO.setOrderStatus(order.getOrderStatus());
         return responseDTO;
     }
+
+    public static OrderDTO toOrderDTO(Order order){
+        OrderDTO orderDTO = new OrderDTO();
+        orderDTO.setOrderCode(order.getOrderCode());
+        orderDTO.setUsername(order.getUser().getUsername());
+        orderDTO.setEmail(order.getUser().getEmail());
+        orderDTO.setOrderTime(order.getOrderTime());
+        orderDTO.setShippingAddress(order.getOrderAddress());
+        orderDTO.setTotal(order.getTotal());
+        orderDTO.setOrderStatus(order.getOrderStatus());
+        return orderDTO;
+    }
+
+    public static List<OrderDTO> toOrderDTOList(List<Order> list){
+        return list.stream().map(OrderConverter::toOrderDTO).toList();
+    }
 }
