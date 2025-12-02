@@ -135,7 +135,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(wishlist);
     }
 
-    @DeleteMapping("/{id}/wishlist")
+    @DeleteMapping("/{id}/wishlist/clear")
     public ResponseEntity<Map <String, String>> emptyWishlist(@PathVariable Long id){
         String response = userService.emptyWishlist(id);
         Map <String, String> body = Map.of("response", response);
