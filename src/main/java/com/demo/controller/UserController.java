@@ -121,14 +121,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(wishlist);
     }
 
-    @PostMapping("/{id}/wishlist")
+    @PostMapping("/{id}/wishlist/add")
     public ResponseEntity<Set <ProductResponseDTO>> addProductToWishlist(@PathVariable Long id, @RequestParam Long productId){
         Set<Product> productSet = userService.addProductToWishlist(id, productId);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
         return ResponseEntity.status(HttpStatus.CREATED).body(wishlist);
     }
 
-    @PatchMapping("/{id}/wishlist")
+    @PatchMapping("/{id}/wishlist/remove")
     public ResponseEntity<Set <ProductResponseDTO>> removeProductFromWishlist(@PathVariable Long id, @RequestParam Long productId){
         Set<Product> productSet = userService.removeProductFromWishlist(id, productId);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
