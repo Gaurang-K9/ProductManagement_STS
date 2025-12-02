@@ -34,6 +34,4 @@ public class Product {
 	@OneToMany(mappedBy = "productReview", cascade = CascadeType.ALL ,orphanRemoval = true)
 	@JsonManagedReference
 	private List<Review> reviews;
-	@ManyToMany
-	private List<User> users;
 }

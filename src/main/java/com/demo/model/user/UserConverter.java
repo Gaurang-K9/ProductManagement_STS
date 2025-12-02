@@ -1,7 +1,9 @@
 package com.demo.model.user;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class UserConverter {
 
@@ -11,7 +13,7 @@ public class UserConverter {
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
         user.setPassword(userDTO.getPassword());
-        user.setWishlist(new ArrayList<>());
+        user.setWishlist(new HashSet<>());
         user.setReviews(new ArrayList<>());
         user.setAddresses(new ArrayList<>());
         return user;
@@ -22,7 +24,7 @@ public class UserConverter {
         UserResponseDTO userResponseDTO = new UserResponseDTO();
         userResponseDTO.setUsername(user.getUsername());
         userResponseDTO.setEmail(user.getEmail());
-        List<String> wishlist = new ArrayList<>();
+        Set<String> wishlist = new HashSet<>();
         List<String> reviews = new ArrayList<>();
         user.getReviews().forEach(review -> reviews.add(review.getReview()));
         user.getWishlist().forEach( product -> wishlist.add(product.getProductName()));

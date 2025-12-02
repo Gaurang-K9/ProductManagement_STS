@@ -53,7 +53,6 @@ public class ProductService {
             Company company = companyService.findCompanyById(companyId);
             Product product = ProductConverter.toProduct(productDTO);
             product.setCompany(company);
-            product.setUsers(new ArrayList<>());
             product.setReviews(new ArrayList<>());
             productRepo.save(product);
             return "product Added Successfully";

@@ -1,6 +1,7 @@
 package com.demo.model.user;
 
 import java.util.List;
+import java.util.Set;
 
 import com.demo.model.address.Address;
 import com.demo.model.product.Product;
@@ -29,7 +30,7 @@ public class User {
 		joinColumns = @JoinColumn(name = "user_id"),
 		inverseJoinColumns = @JoinColumn(name = "product_id")
 	)
-	private List<Product> wishlist;
+	private Set<Product> wishlist;
 	@OneToMany
     @JsonManagedReference
 	private List<Review> reviews;

@@ -14,7 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -79,6 +81,13 @@ public class UserService {
         return reviewService.updateReview(review);
     }
 
+    public String deleteUserReview(Long userId, Long reviewId){
+        if (!userRepo.existsById(userId)) {
+            throw new ResourceNotFoundException(User.class, "userId", userId);
+        }
+        return reviewService.deleteReviewById(reviewId);
+    }
+
     public String updateUser(UserDTO updatedDto, Long userId){
         User updateUser = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
@@ -135,5 +144,46 @@ public class UserService {
         addressList.remove((int) addIndex);
         userRepo.save(user);
         return "address Removed Successfully";
+    }
+
+    public Set<Product> getUserWishlist(Long id){
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+        return user.getWishlist();
+    }
+
+    public Set<Product> addProductToWishlist(Long id, Long productId){
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+        Product product = productService.findProductById(productId);
+        if(user.getWishlist() == null){
+            user.setWishlist(new HashSet<>());
+        }
+        if(!user.getWishlist().add(product)){
+            throw new IllegalStateException("Wishlist already contains product: "+product.getProductName());
+        }
+        user.getWishlist().add(product);
+        userRepo.save(user);
+        return user.getWishlist();
+    }
+
+    public Set<Product> removeProductFromWishlist(Long id, Long productId){
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+        Product product = productService.findProductById(productId);
+        if (!user.getWishlist().remove(product)) {
+            throw new IllegalStateException("Product not found in wishlist: " + product.getProductName());
+        }
+        user.getWishlist().remove(product);
+        userRepo.save(user);
+        return user.getWishlist();
+    }
+
+    public String emptyWishlist(Long id){
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+        user.getWishlist().clear();
+        userRepo.save(user);
+        return "Wishlist emptied successfully";
     }
 }
