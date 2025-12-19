@@ -1,6 +1,7 @@
 package com.demo.service;
 
 import com.demo.exception.ResourceNotFoundException;
+import com.demo.exception.UnauthorizedAccessException;
 import com.demo.model.product.Product;
 import com.demo.model.order.*;
 import com.demo.model.user.User;
@@ -123,7 +124,7 @@ public class OrderService {
         User inputUser = userService.findUserById(userId);
         User orderUser = order.getUser();
         if(!inputUser.equals(orderUser)){
-            throw new IllegalArgumentException("Invalid userId for given order");
+            throw UnauthorizedAccessException.forAction("cancelOrder", Order.class);
         }
         order.setOrderStatus(OrderStatus.CANCELLED);
         inventoryService.updateStockAndReserveQuantity(order);
@@ -136,10 +137,10 @@ public class OrderService {
         User inputUser = userService.findUserById(userId);
         User orderUser = order.getUser();
         if(!inputUser.equals(orderUser)){
-            throw new IllegalArgumentException("Invalid userId for given order");
+            throw UnauthorizedAccessException.forAction("returnOrder", Order.class);
         }
         if(order.getOrderStatus() != OrderStatus.DELIVERED){
-            throw new IllegalArgumentException("Order has not been delivered");
+            throw new IllegalStateException("Order has not been delivered");
         }
         order.setOrderStatus(OrderStatus.RETURNED);
         inventoryService.updateStockAndReserveQuantity(order);

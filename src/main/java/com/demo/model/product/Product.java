@@ -1,6 +1,7 @@
 package com.demo.model.product;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.demo.model.company.Company;
@@ -27,11 +28,15 @@ public class Product {
 	private String productName;
 	private String category;
 	private BigDecimal price;
+	private String imageUrl;
 	@ManyToOne
-	@JoinColumn(name = "company_id")
+	@JoinColumn(name = "company_id", nullable = false)
 	@JsonBackReference
 	private Company company;
 	@OneToMany(mappedBy = "productReview", cascade = CascadeType.ALL ,orphanRemoval = true)
 	@JsonManagedReference
-	private List<Review> reviews;
+	private List<Review> reviews = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 }

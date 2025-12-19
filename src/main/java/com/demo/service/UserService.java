@@ -1,15 +1,16 @@
 package com.demo.service;
 
+import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.address.Address;
 import com.demo.model.product.Product;
 import com.demo.model.review.Review;
 import com.demo.model.review.ReviewConverter;
 import com.demo.model.review.ReviewDTO;
-import com.demo.model.user.User;
-import com.demo.model.user.UserDTO;
+import com.demo.model.user.*;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,11 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
     }
 
+    public User findUserByUsername(String username){
+        return userRepo.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "username", username));
+    }
+
     public Boolean findUserExistsById(Long id){
         return userRepo.existsById(id);
     }
@@ -57,13 +63,46 @@ public class UserService {
         User user = userRepo.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
         userRepo.delete(user);
-        return "User deleted successfully";
+        return "UserId: "+user.getUserId()+" | User: "+user.getUsername()+" Deleted Successfully";
     }
 
-    public String addUserReview(Long id, ReviewDTO reviewDTO) {
+    public String updateIdentity(SimpleUserDTO dto, UserPrincipal userPrincipal){
+        User user = userPrincipal.user();
+
+        if(!user.getUsername().equals(dto.getUsername())){
+            userRepo.findByUsername(dto.getUsername()).ifPresent(
+                    existingUser -> {
+                        throw new ConflictResourceException(User.class, "username", dto.getUsername());
+                    });
+            user.setUsername(dto.getUsername());
+        }
+        user.setEmail(dto.getEmail());
+        userRepo.save(user);
+        return "UserId: "+user.getUserId()+" | User: "+user.getUsername()+" Updated Successfully";
+    }
+
+    public String updatePassword(ChangePasswordDTO dto, UserPrincipal userPrincipal){
+        User user = userPrincipal.user();
+
+        // Validate old password
+        if (!encoder.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Old password is incorrect");
+        }
+
+        // Prevent same password reuse
+        if (encoder.matches(dto.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("New password must be different from old password");
+        }
+
+        user.setPassword(encoder.encode(dto.getNewPassword()));
+        user.setFirstLogin(false);
+        userRepo.save(user);
+        return "Password Updated Successfully";
+    }
+
+    public String addUserReview(UserPrincipal userPrincipal, ReviewDTO reviewDTO) {
         Long productId = reviewDTO.getProductId();
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+        User user = userPrincipal.user();
         Product product = productService.findProductById(productId);
         Review review = ReviewConverter.toReview(reviewDTO);
         review.setProductReview(product);
@@ -71,48 +110,26 @@ public class UserService {
         return reviewService.addReview(review);
     }
 
-    public String updateUserReview(Long userId, Long reviewId, ReviewDTO reviewDTO){
-        if (!userRepo.existsById(userId)) {
-            throw new ResourceNotFoundException(User.class, "userId", userId);
-        }
+    public String updateUserReview(UserPrincipal userPrincipal, Long reviewId, ReviewDTO reviewDTO){
+        User user = userPrincipal.user();
         Review review = reviewService.findReviewById(reviewId);
         review.setReview(reviewDTO.getReview());
         review.setStar(reviewDTO.getStar());
         return reviewService.updateReview(review);
     }
 
-    public String deleteUserReview(Long userId, Long reviewId){
-        if (!userRepo.existsById(userId)) {
-            throw new ResourceNotFoundException(User.class, "userId", userId);
-        }
+    public String deleteUserReview(UserPrincipal userPrincipal, Long reviewId){
+        User user = userPrincipal.user();
         return reviewService.deleteReviewById(reviewId);
     }
 
-    public String updateUser(UserDTO updatedDto, Long userId){
-        User updateUser = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
-        boolean isSameUsername = (updateUser.getUsername().contentEquals(updatedDto.getUsername()));//True for no username change and false for username change
-        boolean sameExists = userRepo.existsByUsername(updatedDto.getUsername());//For changed username ideally should false
-        //If true same name exists in database and should not update
-        if(!isSameUsername && sameExists){
-            return "Cannot Update Username "+updatedDto.getUsername()+" already exists";
-        }
-        else if(!sameExists){
-            updateUser.setUsername(updatedDto.getUsername());
-            updateUser.setEmail(updatedDto.getEmail());
-            updateUser.setPassword(encoder.encode(updatedDto.getPassword()));
-            userRepo.save(updateUser);
-            return "User Updated Successfully";
-        }
-        updateUser.setEmail(updatedDto.getEmail());
-        updateUser.setPassword(encoder.encode(updatedDto.getPassword()));
-        userRepo.save(updateUser);
-        return "User Updated Successfully";
+    public List<Address> findUserAddress(UserPrincipal userPrincipal) {
+        User user = userPrincipal.user();
+        return user.getAddresses();
     }
 
-    public String addAddress(Long id, Address address){
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+    public String addAddress(UserPrincipal userPrincipal, Address address){
+        User user = userPrincipal.user();
         if(user.getAddresses().isEmpty()){
             user.setAddresses(new ArrayList<>());
         }
@@ -121,9 +138,8 @@ public class UserService {
         return "address Added Successfully";
     }
 
-    public String updateAddress(Long id, Integer addIndex ,Address address){
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+    public String updateAddress(UserPrincipal userPrincipal, Integer addIndex ,Address address){
+        User user = userPrincipal.user();
         List<Address> addressList = user.getAddresses();
         if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
             throw new ResourceNotFoundException(Address.class, "addressIndex", addIndex);
@@ -134,9 +150,8 @@ public class UserService {
         return "address Updated Successfully";
     }
 
-    public String removeAddress(Long id, Integer addIndex){
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+    public String removeAddress(UserPrincipal userPrincipal, Integer addIndex){
+        User user = userPrincipal.user();
         List<Address> addressList = user.getAddresses();
         if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
             throw new ResourceNotFoundException(Address.class, "addressIndex", addIndex);
@@ -146,42 +161,38 @@ public class UserService {
         return "address Removed Successfully";
     }
 
-    public Set<Product> getUserWishlist(Long id){
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+    public Set<Product> getUserWishlist(UserPrincipal userPrincipal){
+        User user = userPrincipal.user();
         return user.getWishlist();
     }
 
-    public Set<Product> addProductToWishlist(Long id, Long productId){
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+    public Set<Product> addProductToWishlist(UserPrincipal userPrincipal, Long productId){
+        User user = userPrincipal.user();
         Product product = productService.findProductById(productId);
         if(user.getWishlist() == null){
             user.setWishlist(new HashSet<>());
         }
-        if(!user.getWishlist().add(product)){
-            throw new IllegalStateException("Wishlist already contains product: "+product.getProductName());
+        if(user.getWishlist().contains(product)){
+            throw new ConflictResourceException(Product.class, "productId", productId);
         }
         user.getWishlist().add(product);
         userRepo.save(user);
         return user.getWishlist();
     }
 
-    public Set<Product> removeProductFromWishlist(Long id, Long productId){
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+    public Set<Product> removeProductFromWishlist(UserPrincipal userPrincipal, Long productId){
+        User user = userPrincipal.user();
         Product product = productService.findProductById(productId);
-        if (!user.getWishlist().remove(product)) {
-            throw new IllegalStateException("Product not found in wishlist: " + product.getProductName());
+        if (!user.getWishlist().contains(product)) {
+            throw new ResourceNotFoundException(Product.class, "productId", productId);
         }
         user.getWishlist().remove(product);
         userRepo.save(user);
         return user.getWishlist();
     }
 
-    public String emptyWishlist(Long id){
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", id));
+    public String emptyWishlist(UserPrincipal userPrincipal){
+        User user = userPrincipal.user();
         user.getWishlist().clear();
         userRepo.save(user);
         return "Wishlist emptied successfully";

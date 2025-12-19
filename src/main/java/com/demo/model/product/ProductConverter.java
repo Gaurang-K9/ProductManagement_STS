@@ -21,6 +21,7 @@ public class ProductConverter {
         productResponseDTO.setProductName(product.getProductName());
         productResponseDTO.setCategory(product.getCategory());
         productResponseDTO.setPrice(product.getPrice());
+        productResponseDTO.setImageUrl(product.getImageUrl());
         return productResponseDTO;
     }
 

@@ -19,7 +19,7 @@ public class ShipmentController {
     @Autowired
     ShipmentService shipmentService;
 
-    @GetMapping("/")
+    @GetMapping("/find")
     public ResponseEntity<ShipmentResponseDTO> findByTrackingId(@RequestParam String trackingId){
         Shipment shipment = shipmentService.findShipmentByTrackingId(trackingId);
         ShipmentResponseDTO responseDTO = ShipmentConverter.toShipmentResponseDTO(shipment);

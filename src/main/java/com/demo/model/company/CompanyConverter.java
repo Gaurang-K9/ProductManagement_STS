@@ -33,4 +33,10 @@ public class CompanyConverter {
 
         return companyResponseDTO;
     }
+
+    public static List<CompanyDTO> toCompanyDTOList(List<Company> companyList){
+        List<CompanyDTO> responseList = new ArrayList<>();
+        companyList.forEach(company -> responseList.add(toCompanyDTO(company)));
+        return responseList;
+    }
 }

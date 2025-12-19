@@ -1,11 +1,8 @@
 package com.demo.controller;
 
-import com.demo.model.company.CompanyConverter;
-import com.demo.model.company.CompanyDTO;
-import com.demo.model.company.CompanyResponseDTO;
+import com.demo.model.company.*;
 import org.springframework.web.bind.annotation.*;
 
-import com.demo.model.company.Company;
 import com.demo.service.CompanyService;
 
 import java.util.List;
@@ -25,30 +22,17 @@ public class CompanyController {
 	
 	@GetMapping("/all")
 	public ResponseEntity<List<CompanyDTO>> findAllCompanies(){
-        List<CompanyDTO> companyList = companyService.findAllCompanies()
-                                        .stream()
-                                        .map(CompanyConverter::toCompanyDTO)
-                                        .toList();
-		return ResponseEntity.status(HttpStatus.OK).body(companyList);
+        List<Company> companyList = companyService.findAllCompanies();
+        List<CompanyDTO> responseList = CompanyConverter.toCompanyDTOList(companyList);
+		return ResponseEntity.status(HttpStatus.OK).body(responseList);
 	}
 	
-	@GetMapping("/type/{companyType}")
-	public ResponseEntity<List<CompanyDTO>> findCompanyByType(@PathVariable String companyType){
-        List<CompanyDTO> companyList = companyService.findCompanyByType(companyType)
-                                        .stream()
-                                        .map(CompanyConverter::toCompanyDTO)
-                                        .toList();
-        return ResponseEntity.status(HttpStatus.OK).body(companyList);
+	@GetMapping("/type")
+	public ResponseEntity<List<CompanyDTO>> findCompanyByType(@RequestParam String companytype){
+        List<Company> companyList = companyService.findCompanyByType(companytype);
+        List<CompanyDTO> responseList = CompanyConverter.toCompanyDTOList(companyList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
 	}
-	
-//	@GetMapping("/fetch")
-//	@ResponseBody
-//	//http://localhost:8080/company/fetch?name=Gada Electronics&type=Local
-//	public ResponseEntity<List<Company>> findCompanyByNameOrType(@RequestParam String name, @RequestParam String type){
-//		List<Company> list = companyService.findCompanyByNameOrType(name, type);
-//
-//		return new ResponseEntity<>(list, HttpStatus.OK);
-//	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<CompanyResponseDTO> findCompanyById(@PathVariable Long id){
@@ -58,7 +42,7 @@ public class CompanyController {
     }
 	
 	@PostMapping("/add")
-	public ResponseEntity<Map<String, String>> addCompany(@RequestBody CompanyDTO company){
+	public ResponseEntity<Map<String, String>> addCompany(@RequestBody CompanyRequestDTO company){
 		String response = companyService.addCompany(company);
         Map<String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);

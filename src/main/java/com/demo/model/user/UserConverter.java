@@ -40,10 +40,10 @@ public class UserConverter {
         return dtosList;
     }
 
-    public static UserCartDTO toUserCartDTO(User user){
-        UserCartDTO userCartDTO = new UserCartDTO();
-        userCartDTO.setUsername(user.getUsername());
-        userCartDTO.setEmail(user.getEmail());
-        return userCartDTO;
+    public static SimpleUserDTO toSimpleUserDTO(User user){
+        SimpleUserDTO simpleUserDTO = new SimpleUserDTO();
+        simpleUserDTO.setUsername(user.getUsername());
+        simpleUserDTO.setEmail(user.getEmail());
+        return simpleUserDTO;
     }
 }
