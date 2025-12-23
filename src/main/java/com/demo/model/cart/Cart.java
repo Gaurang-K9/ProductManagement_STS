@@ -4,7 +4,8 @@ import com.demo.model.product.Product;
 import com.demo.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -12,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Cart {

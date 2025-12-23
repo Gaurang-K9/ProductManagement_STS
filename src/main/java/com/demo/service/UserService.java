@@ -8,13 +8,13 @@ import com.demo.model.review.Review;
 import com.demo.model.review.ReviewConverter;
 import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.*;
+import com.demo.repo.ProductRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +26,7 @@ public class UserService {
     UserRepo userRepo;
 
     @Autowired
-    ProductService productService;
+    ProductRepo productRepo;
 
     @Autowired
     ReviewService reviewService;
@@ -67,7 +67,8 @@ public class UserService {
     }
 
     public String updateIdentity(SimpleUserDTO dto, UserPrincipal userPrincipal){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
 
         if(!user.getUsername().equals(dto.getUsername())){
             userRepo.findByUsername(dto.getUsername()).ifPresent(
@@ -82,7 +83,8 @@ public class UserService {
     }
 
     public String updatePassword(ChangePasswordDTO dto, UserPrincipal userPrincipal){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
 
         // Validate old password
         if (!encoder.matches(dto.getOldPassword(), user.getPassword())) {
@@ -102,8 +104,10 @@ public class UserService {
 
     public String addUserReview(UserPrincipal userPrincipal, ReviewDTO reviewDTO) {
         Long productId = reviewDTO.getProductId();
-        User user = userPrincipal.user();
-        Product product = productService.findProductById(productId);
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", productId));
         Review review = ReviewConverter.toReview(reviewDTO);
         review.setProductReview(product);
         review.setUser(user);
@@ -111,7 +115,8 @@ public class UserService {
     }
 
     public String updateUserReview(UserPrincipal userPrincipal, Long reviewId, ReviewDTO reviewDTO){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         Review review = reviewService.findReviewById(reviewId);
         review.setReview(reviewDTO.getReview());
         review.setStar(reviewDTO.getStar());
@@ -119,27 +124,28 @@ public class UserService {
     }
 
     public String deleteUserReview(UserPrincipal userPrincipal, Long reviewId){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         return reviewService.deleteReviewById(reviewId);
     }
 
     public List<Address> findUserAddress(UserPrincipal userPrincipal) {
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         return user.getAddresses();
     }
 
     public String addAddress(UserPrincipal userPrincipal, Address address){
-        User user = userPrincipal.user();
-        if(user.getAddresses().isEmpty()){
-            user.setAddresses(new ArrayList<>());
-        }
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         user.getAddresses().add(address);
         userRepo.save(user);
         return "address Added Successfully";
     }
 
     public String updateAddress(UserPrincipal userPrincipal, Integer addIndex ,Address address){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         List<Address> addressList = user.getAddresses();
         if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
             throw new ResourceNotFoundException(Address.class, "addressIndex", addIndex);
@@ -151,7 +157,8 @@ public class UserService {
     }
 
     public String removeAddress(UserPrincipal userPrincipal, Integer addIndex){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         List<Address> addressList = user.getAddresses();
         if (addressList == null || addIndex < 0 || addIndex >= addressList.size()) {
             throw new ResourceNotFoundException(Address.class, "addressIndex", addIndex);
@@ -162,13 +169,16 @@ public class UserService {
     }
 
     public Set<Product> getUserWishlist(UserPrincipal userPrincipal){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         return user.getWishlist();
     }
 
     public Set<Product> addProductToWishlist(UserPrincipal userPrincipal, Long productId){
-        User user = userPrincipal.user();
-        Product product = productService.findProductById(productId);
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", productId));
         if(user.getWishlist() == null){
             user.setWishlist(new HashSet<>());
         }
@@ -181,8 +191,10 @@ public class UserService {
     }
 
     public Set<Product> removeProductFromWishlist(UserPrincipal userPrincipal, Long productId){
-        User user = userPrincipal.user();
-        Product product = productService.findProductById(productId);
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", productId));
         if (!user.getWishlist().contains(product)) {
             throw new ResourceNotFoundException(Product.class, "productId", productId);
         }
@@ -192,7 +204,8 @@ public class UserService {
     }
 
     public String emptyWishlist(UserPrincipal userPrincipal){
-        User user = userPrincipal.user();
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
         user.getWishlist().clear();
         userRepo.save(user);
         return "Wishlist emptied successfully";

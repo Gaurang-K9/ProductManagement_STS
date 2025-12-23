@@ -11,11 +11,13 @@ import com.demo.model.review.Review;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "\"user\"")
@@ -44,6 +46,7 @@ public class User {
     @OrderColumn(name = "address_index")
     private List<Address> addresses = new ArrayList<>();
     @Enumerated(EnumType.STRING)
+	@Column(nullable = false)
     private Role role;
     private boolean firstLogin = false;
     @ManyToOne

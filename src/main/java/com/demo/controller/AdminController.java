@@ -44,4 +44,12 @@ public class AdminController {
         body.put("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
+
+    @PostMapping("/create/delivery-agent")
+    public ResponseEntity<Map <String, String>> createDeliveryAgent(@RequestBody SimpleUserDTO userDTO){
+        String response = userAuthService.createBackendRole(userDTO, Role.DELIVERY_AGENT);
+        Map<String, String> body = new HashMap<>();
+        body.put("response", response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
 }
