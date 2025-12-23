@@ -3,14 +3,17 @@ package com.demo.model.order;
 import com.demo.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -25,7 +28,7 @@ public class Order {
     @ManyToOne
     private User user;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> items;
+    private List<OrderItem> items = new ArrayList<>();
     private LocalDateTime orderTime;
     @Embedded
     private OrderAddress orderAddress;

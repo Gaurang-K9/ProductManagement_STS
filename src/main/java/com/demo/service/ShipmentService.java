@@ -7,13 +7,18 @@ import com.demo.model.payment.Payment;
 import com.demo.model.payment.PaymentMethod;
 import com.demo.model.payment.PaymentStatus;
 import com.demo.model.shipment.Shipment;
+import com.demo.model.user.Role;
+import com.demo.model.user.User;
+import com.demo.model.user.UserPrincipal;
 import com.demo.repo.ShipmentRepo;
+import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 public class ShipmentService {
@@ -30,6 +35,9 @@ public class ShipmentService {
     @Autowired
     InventoryService inventoryService;
 
+    @Autowired
+    UserRepo userRepo;
+
     private String generateTrackingId(String pincode){
         String date = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
         String timePart = String.valueOf(System.currentTimeMillis());
@@ -38,12 +46,18 @@ public class ShipmentService {
         return "TRK-" + pincode + "-" + date + "-" + lastFive;
     }
 
-    public Shipment createShipment(Long orderId, String courierName){
+    public Shipment createShipment(Long orderId, Long deliveryAgentId){
         Order order = orderService.findOrderById(orderId);
         String pincode = order.getOrderAddress().getPincode();
         String trackingId = generateTrackingId(pincode);
+        User deliveryAgent = userRepo.findById(deliveryAgentId)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", deliveryAgentId));
+
         Shipment shipment = new Shipment();
-        shipment.setCourierName(courierName);
+        if(deliveryAgent.getRole() != Role.DELIVERY_AGENT){
+            throw new IllegalArgumentException("Given user is not delivery agent");
+        }
+        shipment.setDeliveryAgent(deliveryAgent);
         shipment.setOrder(order);
         shipment.setTrackingId(trackingId);
         shipment.setShippedAt(LocalDateTime.now());
@@ -66,14 +80,15 @@ public class ShipmentService {
                 .orElseThrow(() -> new ResourceNotFoundException(Shipment.class, "trackingId", trackingId));
     }
 
-    public Order deliverOrder(String trackingId, String courierName){
-        Shipment shipment = shipmentRepo
-                .findByTrackingId(trackingId)
+    public Order deliverOrder(String trackingId, UserPrincipal userPrincipal){
+        Shipment shipment = shipmentRepo.findByTrackingId(trackingId)
                 .orElseThrow(() -> new ResourceNotFoundException(Shipment.class, "trackingId", trackingId));
 
-        String courier = shipment.getCourierName();
-        if (!courierName.equalsIgnoreCase(courier)) {
-            throw new IllegalArgumentException("Courier mismatch for the given tracking ID.");
+        Long shipmentAgentId = shipment.getDeliveryAgent().getUserId();
+        Long PrincipalAgentId = userPrincipal.user().getUserId();
+
+        if (!shipmentAgentId.equals(PrincipalAgentId)) {
+            throw new IllegalArgumentException("Agent mismatch for the given tracking ID.");
         }
 
         Order order = shipment.getOrder();
@@ -97,4 +112,16 @@ public class ShipmentService {
         return orderService.updateOrder(order);
     }
 
+    public List<Shipment> findShipmentsByPincode(String pincode){
+        return shipmentRepo.findByTrackingIdContaining(pincode);
+    }
+
+    public List<Shipment> findShipmentsForSpecificDate(LocalDate localDate){
+        String date = localDate.format(DateTimeFormatter.BASIC_ISO_DATE);
+        return shipmentRepo.findByTrackingIdContaining(date);
+    }
+
+    public List<Shipment> findShipmentsForDeliveryAgent(Long deliveryAgentId){
+        return shipmentRepo.findByDeliveryAgent_UserId(deliveryAgentId);
+    }
 }

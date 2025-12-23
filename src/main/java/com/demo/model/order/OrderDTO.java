@@ -7,18 +7,16 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderResponseDTO {
+public class OrderDTO {
 
     private String orderCode;
     private String username;
     private String email;
-    private List<ItemResponseDTO> items;
     private LocalDateTime orderTime;
     private OrderAddress shippingAddress;
     private BigDecimal total;

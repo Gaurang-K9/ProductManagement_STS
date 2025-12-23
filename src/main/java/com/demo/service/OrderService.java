@@ -1,10 +1,13 @@
 package com.demo.service;
 
 import com.demo.exception.ResourceNotFoundException;
+import com.demo.exception.UnauthorizedAccessException;
 import com.demo.model.product.Product;
 import com.demo.model.order.*;
 import com.demo.model.user.User;
+import com.demo.model.user.UserPrincipal;
 import com.demo.repo.OrderRepo;
+import com.demo.repo.ProductRepo;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+//TODO Use AuthenticationPrincipal instead of userId in OrderService
 @Log4j2
 @Service
 public class OrderService {
@@ -22,16 +25,13 @@ public class OrderService {
     OrderRepo orderRepo;
 
     @Autowired
-    UserService userService;
-
-    @Autowired
-    ProductService productService;
+    ProductRepo productRepo;
 
     @Autowired
     InventoryService inventoryService;
 
-    public Order createOrder(Long userId, List<OrderItemDTO> itemDTOS, OrderAddress shippingAddress){
-        User user = userService.findUserById(userId);
+    public Order createOrder(UserPrincipal userPrincipal, List<OrderItemDTO> itemDTOS, OrderAddress shippingAddress){
+        User user = userPrincipal.user();
         BigDecimal total = BigDecimal.ZERO;
         Order order = new Order();
         order.setUser(user);
@@ -41,7 +41,8 @@ public class OrderService {
             throw new IllegalArgumentException("Order items cannot be empty");
         }
         for(OrderItemDTO dto: itemDTOS){
-            Product product = productService.findProductById(dto.getProductId());
+            Product product = productRepo.findById(dto.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", dto.getProductId()));
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setProduct(product);
@@ -113,23 +114,35 @@ public class OrderService {
         return orderRepo.findByOrderTimeBetween(time1, time2);
     }
 
-    public List<User> findUsersWithTotalMoreThan(BigDecimal total){
-        return orderRepo.findDistinctUsersWithTotalGreaterThan(total);
-    }
-
     public List<Order> findOrdersByPincodeAndTotalMoreThan(String pincode, BigDecimal total){
         return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total);
     }
 
-    public Order cancelOrder(Long userId, String orderCode){
+    public Order cancelOrder(UserPrincipal userPrincipal, String orderCode){
         Order order = orderRepo.findByOrderCode(orderCode)
                 .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
-        User inputUser = userService.findUserById(userId);
+        User inputUser = userPrincipal.user();
         User orderUser = order.getUser();
         if(!inputUser.equals(orderUser)){
-            throw new IllegalArgumentException("Invalid userId for given order");
+            throw UnauthorizedAccessException.forAction("cancelOrder", Order.class);
         }
         order.setOrderStatus(OrderStatus.CANCELLED);
+        inventoryService.updateStockAndReserveQuantity(order);
+        return orderRepo.save(order);
+    }
+
+    public Order returnOrder(UserPrincipal userPrincipal, String orderCode){
+        Order order = orderRepo.findByOrderCode(orderCode)
+                .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
+        User inputUser = userPrincipal.user();
+        User orderUser = order.getUser();
+        if(!inputUser.equals(orderUser)){
+            throw UnauthorizedAccessException.forAction("returnOrder", Order.class);
+        }
+        if(order.getOrderStatus() != OrderStatus.DELIVERED){
+            throw new IllegalStateException("Order has not been delivered");
+        }
+        order.setOrderStatus(OrderStatus.RETURNED);
         inventoryService.updateStockAndReserveQuantity(order);
         return orderRepo.save(order);
     }

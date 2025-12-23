@@ -1,20 +1,22 @@
 package com.demo.controller;
 
 import com.demo.model.address.Address;
+import com.demo.model.product.Product;
+import com.demo.model.product.ProductConverter;
+import com.demo.model.product.ProductResponseDTO;
 import com.demo.model.review.ReviewDTO;
-import com.demo.model.user.User;
-import com.demo.model.user.UserConverter;
-import com.demo.model.user.UserDTO;
-import com.demo.model.user.UserResponseDTO;
+import com.demo.model.user.*;
 import com.demo.service.UserService;
 import com.demo.service.auth.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -47,23 +49,37 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<Map <String, String>> updateUser(@RequestBody UserDTO updatedDTO, @RequestParam Long userid){
-        String response = userService.updateUser(updatedDTO, userid);
+    @PutMapping("/update/profile")
+    public ResponseEntity<Map <String, String>> updateIdentity(@RequestBody SimpleUserDTO updatedDTO, @AuthenticationPrincipal UserPrincipal userPrincipal){
+        String response = userService.updateIdentity(updatedDTO, userPrincipal);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @PostMapping("/{id}/review")
-    public ResponseEntity<Map <String, String>> addReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO){
-        String response = userService.addUserReview(id, reviewDTO);
+    @PutMapping("/update/password")
+    public ResponseEntity<Map <String, String>> updatePassword(@RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
+        String response = userService.updatePassword(dto, userPrincipal);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+    @PostMapping("/review")
+    public ResponseEntity<Map <String, String>> addReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ReviewDTO reviewDTO){
+        String response = userService.addUserReview(userPrincipal, reviewDTO);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
-    @PutMapping("/{userid}/review/{reviewid}")
-    public ResponseEntity<Map <String, String>> updateReview(@PathVariable Long userid, @PathVariable Long reviewid, @RequestBody ReviewDTO reviewDTO){
-        String response = userService.updateUserReview(userid, reviewid, reviewDTO);
+    @PutMapping("/review/{reviewid}")
+    public ResponseEntity<Map <String, String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid, @RequestBody ReviewDTO reviewDTO){
+        String response = userService.updateUserReview(userPrincipal, reviewid, reviewDTO);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+    @DeleteMapping("/review/{reviewid}")
+    public ResponseEntity<Map <String, String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid) {
+        String response = userService.deleteUserReview(userPrincipal, reviewid);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
@@ -75,30 +91,57 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @GetMapping("/{id}/address")
-    public ResponseEntity<List<Address>> findUserAddress(@PathVariable Long id){
-        User user = userService.findUserById(id);
-        List<Address> addresses = user.getAddresses();
+    @GetMapping("/address")
+    public ResponseEntity<List<Address>> findUserAddress(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        List<Address> addresses = userService.findUserAddress(userPrincipal);
         return ResponseEntity.status(HttpStatus.OK).body(addresses);
     }
 
-    @PostMapping("/{id}/address")
-    public ResponseEntity<Map <String, String>> addAddress(@RequestBody Address address, @PathVariable Long id){
-        String response = userService.addAddress(id, address);
+    @PostMapping("/address")
+    public ResponseEntity<Map <String, String>> addAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal){
+        String response = userService.addAddress(userPrincipal, address);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
-    @PutMapping("/{id}/address/{index}")
-    public ResponseEntity<Map <String, String>> updateAddress(@RequestBody Address address, @PathVariable Long id, @PathVariable Integer index){
-        String response = userService.updateAddress(id, index, address);
+    @PutMapping("/address/{index}")
+    public ResponseEntity<Map <String, String>> updateAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
+        String response = userService.updateAddress(userPrincipal, index, address);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @DeleteMapping("/{id}/address/{index}")
-    public ResponseEntity<Map <String, String>> removeAddress(@PathVariable Long id, @PathVariable Integer index){
-        String response = userService.removeAddress(id, index);
+    @DeleteMapping("/address/{index}")
+    public ResponseEntity<Map <String, String>> removeAddress(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
+        String response = userService.removeAddress(userPrincipal, index);
+        Map <String, String> body = Map.of("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+    @GetMapping("/wishlist")
+    public ResponseEntity<Set <ProductResponseDTO>> getUserWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        Set<Product> productSet = userService.getUserWishlist(userPrincipal);
+        Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
+        return ResponseEntity.status(HttpStatus.OK).body(wishlist);
+    }
+
+    @PostMapping("/wishlist/add")
+    public ResponseEntity<Set <ProductResponseDTO>> addProductToWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
+        Set<Product> productSet = userService.addProductToWishlist(userPrincipal, productId);
+        Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
+        return ResponseEntity.status(HttpStatus.CREATED).body(wishlist);
+    }
+
+    @PatchMapping("/wishlist/remove")
+    public ResponseEntity<Set <ProductResponseDTO>> removeProductFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
+        Set<Product> productSet = userService.removeProductFromWishlist(userPrincipal, productId);
+        Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
+        return ResponseEntity.status(HttpStatus.OK).body(wishlist);
+    }
+
+    @DeleteMapping("/wishlist/clear")
+    public ResponseEntity<Map <String, String>> emptyWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        String response = userService.emptyWishlist(userPrincipal);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }

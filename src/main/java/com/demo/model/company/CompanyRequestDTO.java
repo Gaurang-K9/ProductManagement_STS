@@ -1,4 +1,4 @@
-package com.demo.model.user;
+package com.demo.model.company;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserLoginDTO {
+public class CompanyRequestDTO {
 
-    private String username;
-    private String password;
+    private String company;
+    private String companyType;
 }

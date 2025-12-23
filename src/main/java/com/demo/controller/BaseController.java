@@ -31,10 +31,6 @@ public class BaseController {
     public ResponseEntity<Map<String, String>> userLogin(@RequestBody UserLoginDTO loginDTO){
         String response = userService.login(loginDTO);
         Map<String, String> body = new HashMap<>();
-        if(response.startsWith("C")){
-            body.put("response", response);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
-        }
         body.put("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
@@ -43,10 +39,6 @@ public class BaseController {
     public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserDTO userDTO){
         String response = userService.register(userDTO);
         Map<String, String> body = new HashMap<>();
-        if(response.startsWith("C")){
-            body.put("response", response);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
-        }
         body.put("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }

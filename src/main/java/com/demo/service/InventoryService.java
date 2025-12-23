@@ -51,7 +51,7 @@ public class InventoryService {
                 .orElseThrow(() -> new ResourceNotFoundException(Inventory.class, "productId", productId));
 
         if(quantity <= 0){
-            throw new IllegalStateException("Added Quantity cannot be "+quantity);
+            throw new IllegalArgumentException("Added Quantity cannot be "+quantity);
         }
 
         Integer newQuantity = inventory.getStockQuantity() + quantity;
