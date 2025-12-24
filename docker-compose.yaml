@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: product-owner
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: product_db
+    ports:
+      - "5334:5432"
+    networks:
+      - product-network
+    volumes:
+      - product-volume:/var/lib/postgresql
+
+  pgadmin4:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5430:80"
+    networks:
+      - product-network
+    volumes:
+      - pgadmin-volume:/var/lib/pgadmin
+
+networks:
+  product-network:
+    driver: bridge
+
+volumes:
+  product-volume:
+  pgadmin-volume:
