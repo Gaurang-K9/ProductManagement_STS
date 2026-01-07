@@ -1,5 +1,6 @@
 package com.demo.controller;
 
+import com.demo.model.auth.AuthResponse;
 import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserLoginDTO;
 import com.demo.service.auth.UserAuthService;
@@ -28,11 +29,9 @@ public class BaseController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> userLogin(@RequestBody UserLoginDTO loginDTO){
-        String response = userService.login(loginDTO);
-        Map<String, String> body = new HashMap<>();
-        body.put("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+    public ResponseEntity<AuthResponse> userLogin(@RequestBody UserLoginDTO loginDTO){
+        AuthResponse response = userService.login(loginDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/register")

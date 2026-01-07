@@ -21,7 +21,7 @@ import com.demo.service.ProductService;
 @RequestMapping("/products")
 @CrossOrigin
 public class ProductController {
-	
+
 	@Autowired
 	ProductService productService;
 
@@ -31,14 +31,14 @@ public class ProductController {
 		List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
         return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
-	
+
 	@GetMapping("/type")
 	public ResponseEntity<List<ProductResponseDTO>> findByCategory(@RequestParam String category){
         List<Product> productList = productService.findByCategory(category);
         List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
         return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<ProductResponseDTO> findProductById(@PathVariable Long id){
 		Product product = productService.findProductById(id);
@@ -62,7 +62,7 @@ public class ProductController {
 
 	@PostMapping("/add")
 	public ResponseEntity<Map<String, String>> addProduct(@RequestBody ProductDTO productDTO, @AuthenticationPrincipal UserPrincipal user){
-		String response = productService.addProduct(productDTO, user.getUsername());
+		String response = productService.addProduct(productDTO, user.user().getUserId());
 		Map<String, String> body = Map.of("response", response);
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
@@ -81,12 +81,32 @@ public class ProductController {
         Map<String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
-	
+
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable long id) {
+	public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable Long id) {
 		String response = productService.deleteProduct(id);
         Map<String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 
+	@PostMapping("/{id}/add-owner/")
+	public ResponseEntity<Map<String, String>> addOwnerToProduct(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user){
+		String response = productService.addProductOwnerToProduct(id, user.user().getUserId());
+		Map<String, String> body = Map.of("response", response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+	}
+
+	@DeleteMapping("/{id}/add-owner/")
+	public ResponseEntity<Map<String, String>> removeOwnerFromProduct(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user){
+		String response = productService.removeProductOwnerFromProduct(id, user.user().getUserId());
+		Map<String, String> body = Map.of("response", response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+	}
+
+	@PatchMapping("/{productid}/change-company/{companyid}")
+	public ResponseEntity<Map<String, String>> changeCompany(@PathVariable Long productid, @PathVariable Long companyid){
+		String response = productService.changeProductCompany(productid, companyid);
+		Map<String, String> body = Map.of("response", response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+	}
 }

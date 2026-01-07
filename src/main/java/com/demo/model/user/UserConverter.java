@@ -1,5 +1,9 @@
 package com.demo.model.user;
 
+import com.demo.model.address.Address;
+import com.demo.model.company.CompanyConverter;
+import com.demo.model.company.CompanyDTO;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,5 +49,24 @@ public class UserConverter {
         simpleUserDTO.setUsername(user.getUsername());
         simpleUserDTO.setEmail(user.getEmail());
         return simpleUserDTO;
+    }
+
+    public static UserProfileDTO  toUserProfileDTO(User user){
+        UserProfileDTO userProfileDTO = new UserProfileDTO();
+        userProfileDTO.setUsername(user.getUsername());
+        userProfileDTO.setEmail(user.getEmail());
+        List<Address> addresses = user.getAddresses();
+        userProfileDTO.setAddresses(addresses);
+        return userProfileDTO;
+    }
+
+    public static ProductOwnerDTO toProductOwnerDTO(User user, List<String> products){
+        ProductOwnerDTO productOwnerDTO = new ProductOwnerDTO();
+        productOwnerDTO.setUsername(user.getUsername());
+        productOwnerDTO.setEmail(user.getEmail());
+        productOwnerDTO.setProducts(products);
+        CompanyDTO companyDTO = CompanyConverter.toCompanyDTO(user.getCompany());
+        productOwnerDTO.setCompany(companyDTO);
+        return productOwnerDTO;
     }
 }

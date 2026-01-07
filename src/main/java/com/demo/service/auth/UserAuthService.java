@@ -1,6 +1,7 @@
 package com.demo.service.auth;
 
 import com.demo.exception.ConflictResourceException;
+import com.demo.model.auth.AuthResponse;
 import com.demo.model.user.*;
 import com.demo.repo.UserRepo;
 import lombok.extern.slf4j.Slf4j;
@@ -45,14 +46,15 @@ public class UserAuthService {
         return "User Registered successfully";
     }
 
-    public String login(UserLoginDTO loginDTO) {
+    public AuthResponse login(UserLoginDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword()));
 
         User user = userRepo.findByUsername(loginDTO.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
+        String token = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
+        return new AuthResponse(token, user.isFirstLogin(),  user.getRole());
     }
 
     public String randomPasswordGenerator(){
