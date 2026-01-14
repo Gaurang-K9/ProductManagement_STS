@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import com.demo.exception.InvalidPasswordException;
 import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.address.Address;
@@ -11,13 +12,13 @@ import com.demo.model.user.*;
 import com.demo.repo.ProductRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -88,12 +89,12 @@ public class UserService {
 
         // Validate old password
         if (!encoder.matches(dto.getOldPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Old password is incorrect");
+            throw new InvalidPasswordException("Old password is incorrect");
         }
 
         // Prevent same password reuse
         if (encoder.matches(dto.getNewPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("New password must be different from old password");
+            throw new InvalidPasswordException("New password must be different from old password");
         }
 
         user.setPassword(encoder.encode(dto.getNewPassword()));
@@ -210,4 +211,16 @@ public class UserService {
         userRepo.save(user);
         return "Wishlist emptied successfully";
     }
+
+    public UserLoginDTO adminResetPassword(String user){
+        User requestedUser = findUserByUsername(user);
+        String rawPassword = UUID.randomUUID().toString().substring(0, 10);
+
+        requestedUser.setPassword(encoder.encode(rawPassword));
+        requestedUser.setFirstLogin(true);
+        userRepo.save(requestedUser);
+
+        return new UserLoginDTO(requestedUser.getUsername(), rawPassword);
+    }
+
 }

@@ -116,12 +116,20 @@ public class ShipmentService {
         return shipmentRepo.findByTrackingIdContaining(pincode);
     }
 
-    public List<Shipment> findShipmentsForSpecificDate(LocalDate localDate){
+    public List<Shipment> findShipmentsBySpecificDate(LocalDate localDate){
         String date = localDate.format(DateTimeFormatter.BASIC_ISO_DATE);
         return shipmentRepo.findByTrackingIdContaining(date);
     }
 
-    public List<Shipment> findShipmentsForDeliveryAgent(Long deliveryAgentId){
+    public List<Shipment> findShipmentsByDeliveryAgent(Long deliveryAgentId){
         return shipmentRepo.findByDeliveryAgent_UserId(deliveryAgentId);
+    }
+
+    public List<Shipment> findShipmentsByOrderStatus(OrderStatus orderStatus){
+        return shipmentRepo.findByOrder_OrderStatus(orderStatus);
+    }
+
+    public List<Shipment> findShipmentsByDeliveryAgentAndOrderStatus(Long deliveryAgentId, OrderStatus orderStatus){
+        return shipmentRepo.findByDeliveryAgent_UserIdAndOrder_OrderStatus(deliveryAgentId, orderStatus);
     }
 }

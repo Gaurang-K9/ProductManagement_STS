@@ -1,6 +1,7 @@
 package com.demo.filter;
 
 import com.demo.model.user.UserPrincipal;
+import com.demo.security.SecurityConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 public class FirstLoginFilter extends OncePerRequestFilter {
@@ -26,7 +28,7 @@ public class FirstLoginFilter extends OncePerRequestFilter {
             boolean isFirstLogin = user.user().isFirstLogin();
             String path = request.getRequestURI();
 
-            boolean isAllowedPath = path.startsWith("/login") || path.startsWith("/users/update/password");
+            boolean isAllowedPath = Arrays.stream(SecurityConstants.FIRST_LOGIN_ALLOWED).anyMatch(path::startsWith);
 
             if (isFirstLogin && !isAllowedPath) {
                 response.setStatus(HttpStatus.FORBIDDEN.value());

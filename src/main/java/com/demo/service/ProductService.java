@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.demo.exception.ResourceNotFoundException;
-import com.demo.exception.UnauthorizedAccessException;
+import com.demo.exception.ForbiddenAccessException;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductDTO;
 import com.demo.model.company.Company;
@@ -80,7 +80,7 @@ public class ProductService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
         if(user.getRole() == Role.CUSTOMER || user.getRole() == Role.DELIVERY_AGENT){
-            throw UnauthorizedAccessException.forAction("Add", Product.class);
+            throw ForbiddenAccessException.forAction("Add", Product.class);
         }
         else if(user.getRole() == Role.PRODUCT_OWNER){
             product.setOwner(user);
@@ -125,7 +125,7 @@ public class ProductService {
         User productOwner = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
         if (productOwner.getRole() != Role.PRODUCT_OWNER) {
-            throw UnauthorizedAccessException.forAction("owning", Product.class);
+            throw ForbiddenAccessException.forAction("owning", Product.class);
         }
         Product product = findProductById(productId);
         if (product.getOwner() != null) {
@@ -144,7 +144,7 @@ public class ProductService {
             throw new IllegalStateException("Product has no owner assigned");
         }
         if (!product.getOwner().equals(productOwner)) {
-            throw UnauthorizedAccessException.forAction("removing", Product.class);
+            throw ForbiddenAccessException.forAction("removing", Product.class);
         }
         product.setOwner(null);
         productRepo.save(product);
