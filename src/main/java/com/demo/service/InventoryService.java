@@ -1,5 +1,7 @@
 package com.demo.service;
 
+import com.demo.exception.BadRequestException;
+import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.inventory.Inventory;
 import com.demo.model.order.Order;
@@ -51,7 +53,7 @@ public class InventoryService {
                 .orElseThrow(() -> new ResourceNotFoundException(Inventory.class, "productId", productId));
 
         if(quantity <= 0){
-            throw new IllegalArgumentException("Added Quantity cannot be "+quantity);
+            throw new BadRequestException("Resupply quantity must be positive, received: " + quantity);
         }
 
         Integer newQuantity = inventory.getStockQuantity() + quantity;
@@ -72,7 +74,7 @@ public class InventoryService {
 
     private void validateItem(OrderItem item) {
         if (item.getQuantity() <= 0)
-            throw new IllegalArgumentException("Invalid item quantity: " + item.getQuantity());
+            throw new BadRequestException("Invalid item quantity: " + item.getQuantity());
     }
 
     private void deliverOrder(List<OrderItem> items) {
@@ -82,7 +84,7 @@ public class InventoryService {
 
             int reserveQuantity =  inventory.getReservedQuantity() - item.getQuantity();
             if (reserveQuantity < 0) {
-                throw new IllegalStateException("Invalid reserve stock for product: " + item.getProduct().getProductName());
+                throw new ConflictResourceException("Invalid reserve stock for product: " + item.getProduct().getProductName());
             }
             inventory.setReservedQuantity(reserveQuantity);
             inventoryRepo.save(inventory);
@@ -95,7 +97,7 @@ public class InventoryService {
             validateItem(item);
 
             if (inventory.getStockQuantity() < item.getQuantity()) {
-                throw new IllegalStateException("Insufficient stock for product: " + item.getProduct().getProductName());
+                throw new ConflictResourceException("Insufficient stock for product: " + item.getProduct().getProductName());
             }
             Integer stockQuantity = inventory.getStockQuantity() - item.getQuantity();
             Integer reserveQuantity =  inventory.getReservedQuantity() + item.getQuantity();
@@ -112,7 +114,7 @@ public class InventoryService {
 
             int reserveQuantity =  inventory.getReservedQuantity() - item.getQuantity();
             if (reserveQuantity < 0) {
-                throw new IllegalStateException("Invalid reserve stock for cancelling product: " + item.getProduct().getProductName());
+                throw new ConflictResourceException("Invalid reserve stock for cancelling product: " + item.getProduct().getProductName());
             }
             Integer stockQuantity = inventory.getStockQuantity() + item.getQuantity();
 

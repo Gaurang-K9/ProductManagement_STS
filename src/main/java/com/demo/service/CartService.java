@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import com.demo.exception.BadRequestException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.address.Address;
 import com.demo.model.cart.CartItemConverter;
@@ -114,7 +115,7 @@ public class CartService {
         List<CartItem> cartItems = findCartItemsByCartId(cartid);
 
         if (cartItems.isEmpty()) {
-            throw new IllegalArgumentException("Cannot place order with empty cart");
+            throw new BadRequestException("Cannot place order with empty cart");
         }
 
         if (user.getAddresses() == null || user.getAddresses().isEmpty()) {

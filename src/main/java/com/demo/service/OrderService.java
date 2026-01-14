@@ -1,5 +1,7 @@
 package com.demo.service;
 
+import com.demo.exception.BadRequestException;
+import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.exception.ForbiddenAccessException;
 import com.demo.model.product.Product;
@@ -38,7 +40,7 @@ public class OrderService {
         order.setOrderAddress(shippingAddress);
         List<OrderItem> orderItems = new ArrayList<>();
         if (itemDTOS == null || itemDTOS.isEmpty()) {
-            throw new IllegalArgumentException("Order items cannot be empty");
+            throw new BadRequestException("Order items cannot be empty");
         }
         for(OrderItemDTO dto: itemDTOS){
             Product product = productRepo.findById(dto.getProductId())
@@ -140,7 +142,7 @@ public class OrderService {
             throw ForbiddenAccessException.forAction("return", Order.class);
         }
         if(order.getOrderStatus() != OrderStatus.DELIVERED){
-            throw new IllegalStateException("Order has not been delivered");
+            throw new ConflictResourceException("Order has not been delivered");
         }
         order.setOrderStatus(OrderStatus.RETURNED);
         inventoryService.updateStockAndReserveQuantity(order);

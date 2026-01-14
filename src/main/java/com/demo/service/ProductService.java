@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.exception.ForbiddenAccessException;
 import com.demo.model.product.ProductConverter;
@@ -129,7 +130,7 @@ public class ProductService {
         }
         Product product = findProductById(productId);
         if (product.getOwner() != null) {
-            throw new IllegalStateException("Product already has an owner");
+            throw new ConflictResourceException("Product already has an owner");
         }
         product.setOwner(productOwner);
         productRepo.save(product);
@@ -141,7 +142,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
         Product product = findProductById(productId);
         if (product.getOwner() == null) {
-            throw new IllegalStateException("Product has no owner assigned");
+            throw new ConflictResourceException("Product has no owner assigned");
         }
         if (!product.getOwner().equals(productOwner)) {
             throw ForbiddenAccessException.forAction("removing", Product.class);

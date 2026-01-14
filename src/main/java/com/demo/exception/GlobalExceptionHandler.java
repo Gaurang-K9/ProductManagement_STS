@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictResourceException.class)
     public ResponseEntity<ExceptionResponse> handleConflictResourceException(ConflictResourceException exception){
         return ResponseEntity.status(HttpStatus.CONFLICT).
-                body(ExceptionResponse.of("Resource already exists or cannot be created due to conflict", exception.getMessage()));
+                body(ExceptionResponse.of("Conflict Occured For Given Resource", exception.getMessage()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -38,6 +38,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleBadPassword(InvalidPasswordException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).
                 body(ExceptionResponse.of("Password Validation Failed", exception.getMessage()));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ExceptionResponse> handleBadRequest(BadRequestException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).
+                body(ExceptionResponse.of("Bad Request", exception.getMessage()));
     }
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity<Map<String, Object>> handleGeneralException(Exception exception){
