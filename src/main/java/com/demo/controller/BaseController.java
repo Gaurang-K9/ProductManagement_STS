@@ -5,6 +5,7 @@ import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserLoginDTO;
 import com.demo.service.auth.UserAuthService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class BaseController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> userRegister(@RequestBody UserDTO userDTO){
+    public ResponseEntity<Map<String, String>> userRegister(@Valid @RequestBody UserDTO userDTO){
         String response = userService.register(userDTO);
         Map<String, String> body = new HashMap<>();
         body.put("response", response);

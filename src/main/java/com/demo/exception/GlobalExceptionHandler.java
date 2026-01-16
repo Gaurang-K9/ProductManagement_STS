@@ -4,6 +4,7 @@ import com.demo.model.exception.ExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -44,6 +45,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleBadRequest(BadRequestException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).
                 body(ExceptionResponse.of("Bad Request", exception.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+        String message = exception.getBindingResult().getFieldError().getDefaultMessage();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).
+                body(ExceptionResponse.of("Validation Failed", message));
     }
 //    @ExceptionHandler(Exception.class)
 //    public ResponseEntity<Map<String, Object>> handleGeneralException(Exception exception){

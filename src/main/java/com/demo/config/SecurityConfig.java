@@ -2,7 +2,7 @@ package com.demo.config;
 
 import com.demo.filter.FirstLoginFilter;
 import com.demo.filter.JWTFilter;
-import com.demo.security.SecurityConstants;
+import com.demo.constants.AuthEndpointConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(requests ->  requests
-                        .requestMatchers(SecurityConstants.JWT_EXCLUDED)
+                        .requestMatchers(AuthEndpointConstants.JWT_EXCLUDED)
                         .permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())

@@ -8,6 +8,7 @@ import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.*;
 import com.demo.service.UserService;
 import com.demo.service.auth.UserAuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,14 +51,14 @@ public class UserController {
     }
 
     @PutMapping("/update/profile")
-    public ResponseEntity<Map <String, String>> updateIdentity(@RequestBody SimpleUserDTO updatedDTO, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<Map <String, String>> updateIdentity(@Valid @RequestBody SimpleUserDTO updatedDTO, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updateIdentity(updatedDTO, userPrincipal);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
     @PutMapping("/update/password")
-    public ResponseEntity<Map <String, String>> updatePassword(@RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<Map <String, String>> updatePassword(@Valid @RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updatePassword(dto, userPrincipal);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);

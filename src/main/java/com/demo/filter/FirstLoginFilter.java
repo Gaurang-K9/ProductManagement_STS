@@ -1,7 +1,7 @@
 package com.demo.filter;
 
 import com.demo.model.user.UserPrincipal;
-import com.demo.security.SecurityConstants;
+import com.demo.constants.AuthEndpointConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +28,7 @@ public class FirstLoginFilter extends OncePerRequestFilter {
             boolean isFirstLogin = user.user().isFirstLogin();
             String path = request.getRequestURI();
 
-            boolean isAllowedPath = Arrays.stream(SecurityConstants.FIRST_LOGIN_ALLOWED).anyMatch(path::startsWith);
+            boolean isAllowedPath = Arrays.stream(AuthEndpointConstants.FIRST_LOGIN_ALLOWED).anyMatch(path::startsWith);
 
             if (isFirstLogin && !isAllowedPath) {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
