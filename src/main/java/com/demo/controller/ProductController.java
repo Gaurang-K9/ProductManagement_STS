@@ -8,7 +8,11 @@ import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductDTO;
 import com.demo.model.product.ProductResponseDTO;
 import com.demo.model.user.UserPrincipal;
+import com.demo.shared.PageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,18 +29,34 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 
-	@GetMapping("/all")
+	@GetMapping("/get-all")
 	public ResponseEntity<List<ProductResponseDTO>> findAllProducts(){
         List<Product> productList = productService.findAllProducts();
 		List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
         return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
-	@GetMapping("/type")
+	@GetMapping("/all")
+	public PageResponse<ProductResponseDTO> findAllProducts(
+			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
+		return PageResponse.fromPage(productService.findAllProducts(pageable).map(
+				ProductConverter::toProductResponseDTO
+		));
+	}
+
+	@GetMapping("/category")
 	public ResponseEntity<List<ProductResponseDTO>> findByCategory(@RequestParam String category){
         List<Product> productList = productService.findByCategory(category);
         List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
         return ResponseEntity.status(HttpStatus.OK).body(products);
+	}
+
+	@GetMapping("/type")
+	public PageResponse<ProductResponseDTO> findByCategory(@RequestParam String type,
+		   @PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable) {
+		return PageResponse.fromPage(productService.findByCategory(type, pageable).map(
+				ProductConverter::toProductResponseDTO
+		));
 	}
 
 	@GetMapping("/{id}")
@@ -46,12 +66,19 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @GetMapping("/price")
+    @GetMapping("/product-price")
     public ResponseEntity<List<ProductResponseDTO>> findProductsInPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max){
         List<Product> productList = productService.findProductsInPriceRange(min, max);
         List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
+
+	@GetMapping("/price")
+	public PageResponse<ProductResponseDTO> findProductsInPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max,
+			@PageableDefault(sort = "price", direction = Sort.Direction.ASC) Pageable pageable){
+		return PageResponse.fromPage(productService.findProductsInPriceRange(min, max, pageable)
+				.map(ProductConverter::toProductResponseDTO));
+	}
 
     @GetMapping("/stars")
     public ResponseEntity<List<ProductResponseDTO>> findProductsByStarsMoreThan(@RequestParam Short s){
@@ -59,6 +86,13 @@ public class ProductController {
         List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
+
+	@GetMapping("/review")
+	public PageResponse<ProductResponseDTO> findProductsByAverageStarsMoreThan(@RequestParam Short stars,
+			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
+		return  PageResponse.fromPage(productService.findProductsByStarMoreThan(stars, pageable)
+				.map(ProductConverter::toProductResponseDTO));
+	}
 
 	@PostMapping("/add")
 	public ResponseEntity<Map<String, String>> addProduct(@RequestBody ProductDTO productDTO, @AuthenticationPrincipal UserPrincipal user){
@@ -89,14 +123,14 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 
-	@PostMapping("/{id}/add-owner/")
+	@PostMapping("/{id}/add-owner")
 	public ResponseEntity<Map<String, String>> addOwnerToProduct(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user){
 		String response = productService.addProductOwnerToProduct(id, user.user().getUserId());
 		Map<String, String> body = Map.of("response", response);
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
 
-	@DeleteMapping("/{id}/add-owner/")
+	@DeleteMapping("/{id}/remove-owner")
 	public ResponseEntity<Map<String, String>> removeOwnerFromProduct(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user){
 		String response = productService.removeProductOwnerFromProduct(id, user.user().getUserId());
 		Map<String, String> body = Map.of("response", response);

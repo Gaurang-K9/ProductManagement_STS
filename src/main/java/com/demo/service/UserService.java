@@ -223,4 +223,9 @@ public class UserService {
         return new UserLoginDTO(requestedUser.getUsername(), rawPassword);
     }
 
+    public List<Review> findUserReviews(UserPrincipal userPrincipal) {
+        Long userId = userPrincipal.user().getUserId();
+        User user = findUserById(userId);
+        return user.getReviews();
+    }
 }

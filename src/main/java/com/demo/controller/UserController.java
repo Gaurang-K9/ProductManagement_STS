@@ -4,7 +4,10 @@ import com.demo.model.address.Address;
 import com.demo.model.product.Product;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductResponseDTO;
+import com.demo.model.review.Review;
+import com.demo.model.review.ReviewConverter;
 import com.demo.model.review.ReviewDTO;
+import com.demo.model.review.UserReviewResponseDTO;
 import com.demo.model.user.*;
 import com.demo.service.UserService;
 import com.demo.service.auth.UserAuthService;
@@ -36,6 +39,13 @@ public class UserController {
         return new ResponseEntity<>(userList, HttpStatus.OK);
     }
 
+    @GetMapping("/my-profile")
+    public ResponseEntity<UserProfileDTO> getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        User user = userService.findUserById(userPrincipal.user().getUserId());
+        UserProfileDTO responseDTO = UserConverter.toUserProfileDTO(user);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> findUserById(@PathVariable Long id){
         User user = userService.findUserById(id);
@@ -62,6 +72,13 @@ public class UserController {
         String response = userService.updatePassword(dto, userPrincipal);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
+    @GetMapping("/review")
+    public ResponseEntity<List<UserReviewResponseDTO>> findUserReviews(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        List<Review> userReviews = userService.findUserReviews(userPrincipal);
+        List<UserReviewResponseDTO> response = ReviewConverter.toUserReviewsList(userReviews);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/review")

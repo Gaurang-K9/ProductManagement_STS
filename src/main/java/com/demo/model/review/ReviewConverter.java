@@ -26,4 +26,20 @@ public class ReviewConverter {
         reviews.forEach(review -> dtosList.add(toReviewResponseDTO(review)));
         return dtosList;
     }
+
+    public static UserReviewResponseDTO toUserReviewResponseDTO(Review review){
+        UserReviewResponseDTO userReviewResponseDTO = new UserReviewResponseDTO();
+        userReviewResponseDTO.setReviewId(review.getReviewId());
+        userReviewResponseDTO.setUsername(review.getUser().getUsername());
+        userReviewResponseDTO.setProductName(review.getProductReview().getProductName());
+        userReviewResponseDTO.setReview(review.getReview());
+        userReviewResponseDTO.setStar(review.getStar());
+        return userReviewResponseDTO;
+    }
+
+    public static List<UserReviewResponseDTO> toUserReviewsList(List<Review> reviews){
+        List<UserReviewResponseDTO> dtosList = new ArrayList<>();
+        reviews.forEach(review -> dtosList.add(toUserReviewResponseDTO(review)));
+        return dtosList;
+    }
 }
