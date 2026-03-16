@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-//TODO Use AuthenticationPrincipal instead of userId in OrderService
+
 @Log4j2
 @Service
 public class OrderService {

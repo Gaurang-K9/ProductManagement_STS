@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-//TODO Use AuthenticationPrincipal instead of userId in CartService
+
 @Service
 public class CartService {
 
@@ -48,7 +48,7 @@ public class CartService {
         return cart.getCartItems();
     }
 
-    public List<CartItem> findCartItemsByCartId(Long cartId){
+    private List<CartItem> findCartItemsByCartId(Long cartId){
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException(Cart.class, "cartId", cartId));
         return cart.getCartItems();

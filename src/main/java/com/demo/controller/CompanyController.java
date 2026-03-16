@@ -1,6 +1,8 @@
 package com.demo.controller;
 
 import com.demo.model.company.*;
+import com.demo.shared.PageResponse;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import com.demo.service.CompanyService;
@@ -20,18 +22,32 @@ public class CompanyController {
 	@Autowired
 	CompanyService companyService;
 	
-	@GetMapping("/all")
+	@GetMapping("/get-all")
 	public ResponseEntity<List<CompanyDTO>> findAllCompanies(){
         List<Company> companyList = companyService.findAllCompanies();
         List<CompanyDTO> responseList = CompanyConverter.toCompanyDTOList(companyList);
 		return ResponseEntity.status(HttpStatus.OK).body(responseList);
 	}
-	
-	@GetMapping("/type")
+
+	@GetMapping("/all")
+	public PageResponse<CompanyResponseDTO> findAllCompanies(Pageable pageable){
+		return PageResponse.fromPage(companyService.findAllCompanies(pageable).map(
+				CompanyConverter::toCompanyResponseDTO
+		));
+	}
+
+	@GetMapping("/by-type")
 	public ResponseEntity<List<CompanyDTO>> findCompanyByType(@RequestParam String companytype){
         List<Company> companyList = companyService.findCompanyByType(companytype);
         List<CompanyDTO> responseList = CompanyConverter.toCompanyDTOList(companyList);
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
+	}
+
+	@GetMapping("/type")
+	public PageResponse<CompanyResponseDTO> findCompanyByType(Pageable pageable, @RequestParam String category){
+		return PageResponse.fromPage(companyService.findCompanyByType(pageable, category).map(
+				CompanyConverter::toCompanyResponseDTO
+		));
 	}
 
 	@GetMapping("/{id}")

@@ -4,10 +4,6 @@ import com.demo.model.address.Address;
 import com.demo.model.product.Product;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductResponseDTO;
-import com.demo.model.review.Review;
-import com.demo.model.review.ReviewConverter;
-import com.demo.model.review.ReviewDTO;
-import com.demo.model.review.UserReviewResponseDTO;
 import com.demo.model.user.*;
 import com.demo.service.UserService;
 import com.demo.service.auth.UserAuthService;
@@ -70,34 +66,6 @@ public class UserController {
     @PutMapping("/update/password")
     public ResponseEntity<Map <String, String>> updatePassword(@Valid @RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updatePassword(dto, userPrincipal);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
-    }
-
-    @GetMapping("/review")
-    public ResponseEntity<List<UserReviewResponseDTO>> findUserReviews(@AuthenticationPrincipal UserPrincipal userPrincipal){
-        List<Review> userReviews = userService.findUserReviews(userPrincipal);
-        List<UserReviewResponseDTO> response = ReviewConverter.toUserReviewsList(userReviews);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @PostMapping("/review")
-    public ResponseEntity<Map <String, String>> addReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ReviewDTO reviewDTO){
-        String response = userService.addUserReview(userPrincipal, reviewDTO);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
-    }
-
-    @PutMapping("/review/{reviewid}")
-    public ResponseEntity<Map <String, String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid, @RequestBody ReviewDTO reviewDTO){
-        String response = userService.updateUserReview(userPrincipal, reviewid, reviewDTO);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
-    }
-
-    @DeleteMapping("/review/{reviewid}")
-    public ResponseEntity<Map <String, String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid) {
-        String response = userService.deleteUserReview(userPrincipal, reviewid);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }

@@ -11,6 +11,8 @@ import com.demo.model.user.User;
 import com.demo.repo.ProductRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.demo.model.company.Company;
@@ -36,9 +38,17 @@ public class CompanyService {
 	public List<Company> findAllCompanies(){
 		return companyRepo.findAll();
 	}
+
+	public Page<Company> findAllCompanies(Pageable pageable){
+		return companyRepo.findAll(pageable);
+	}
 	
-	public List<Company> findCompanyByType(String company_type){
-		return companyRepo.findByCompanyType(company_type);
+	public List<Company> findCompanyByType(String companyType){
+		return companyRepo.findByCompanyType(companyType);
+	}
+
+	public Page<Company> findCompanyByType(Pageable pageable, String companyType){
+		return companyRepo.findByCompanyType(pageable, companyType);
 	}
 
 	public String addCompany(CompanyRequestDTO companyRequestDTO) {

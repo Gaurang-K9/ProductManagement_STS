@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-//TODO Add AuthenticationPrincipal instead of userId in OrderController
+
 @RestController
 @RequestMapping("/order")
 @CrossOrigin

@@ -44,14 +44,14 @@ public class ProductController {
 		));
 	}
 
-	@GetMapping("/category")
+	@GetMapping("/type")
 	public ResponseEntity<List<ProductResponseDTO>> findByCategory(@RequestParam String category){
         List<Product> productList = productService.findByCategory(category);
         List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
         return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
-	@GetMapping("/type")
+	@GetMapping("/category")
 	public PageResponse<ProductResponseDTO> findByCategory(@RequestParam String type,
 		   @PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable) {
 		return PageResponse.fromPage(productService.findByCategory(type, pageable).map(
@@ -101,7 +101,7 @@ public class ProductController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
 
-	@PutMapping("/{id}/image")
+	@PutMapping("/update/{id}/image")
 	public ResponseEntity<Map<String, String>> addOrUpdateImageUrl(@PathVariable Long id ,@RequestBody Map<String, String> request){
 		String imageUrl = request.get("imageUrl");
 		String response = productService.addOrUpdateImageUrl(id, imageUrl);
@@ -134,13 +134,13 @@ public class ProductController {
 	public ResponseEntity<Map<String, String>> removeOwnerFromProduct(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user){
 		String response = productService.removeProductOwnerFromProduct(id, user.user().getUserId());
 		Map<String, String> body = Map.of("response", response);
-		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+		return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 
 	@PatchMapping("/{productid}/change-company/{companyid}")
 	public ResponseEntity<Map<String, String>> changeCompany(@PathVariable Long productid, @PathVariable Long companyid){
 		String response = productService.changeProductCompany(productid, companyid);
 		Map<String, String> body = Map.of("response", response);
-		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+		return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
 }

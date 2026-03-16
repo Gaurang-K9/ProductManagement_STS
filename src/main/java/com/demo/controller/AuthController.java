@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class BaseController {
+public class AuthController {
 
     @Autowired
     UserAuthService userService;
