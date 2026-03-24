@@ -1,5 +1,7 @@
 package com.demo.model.shipment;
 
+import java.util.List;
+
 public class ShipmentConverter {
 
     public static ShipmentResponseDTO toShipmentResponseDTO(Shipment shipment){
@@ -9,5 +11,22 @@ public class ShipmentConverter {
         shipmentResponseDTO.setTrackingId(shipment.getTrackingId());
         shipmentResponseDTO.setShippedAt(shipment.getShippedAt());
         return shipmentResponseDTO;
+    }
+
+    public static List<ShipmentResponseDTO> toShipmentResponseDTOList(List<Shipment> shipments){
+        return shipments.stream().map(ShipmentConverter::toShipmentResponseDTO).toList();
+    }
+
+    public static ShipmentDeliveryAgentDTO toShipmentDeliveryAgentDTO(Shipment shipment){
+        ShipmentDeliveryAgentDTO shipmentDeliveryAgentDTO = new ShipmentDeliveryAgentDTO();
+        shipmentDeliveryAgentDTO.setTrackingId(shipment.getTrackingId());
+        shipmentDeliveryAgentDTO.setDeliveryAgent(shipment.getDeliveryAgent().getUsername());
+        shipmentDeliveryAgentDTO.setShippingAddress(shipment.getOrder().getOrderAddress());
+        shipmentDeliveryAgentDTO.setTotal(shipment.getOrder().getTotal());
+        return shipmentDeliveryAgentDTO;
+    }
+
+    public static List<ShipmentDeliveryAgentDTO> toShipmentDeliveryAgentDTOList(List<Shipment> shipments){
+        return shipments.stream().map(ShipmentConverter::toShipmentDeliveryAgentDTO).toList();
     }
 }

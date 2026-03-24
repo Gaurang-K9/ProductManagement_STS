@@ -36,4 +36,10 @@ public class ProductConverter {
         wishlist.forEach( product -> dtoSet.add(toProductResponseDTO(product)));
         return dtoSet;
     }
+
+    public static List<String> toProductNameList(List<Product> productlist){
+        List<String> products = new ArrayList<>();
+        productlist.forEach(product -> products.add(product.getProductName()));
+        return products;
+    }
 }

@@ -4,14 +4,19 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
+import com.demo.exception.ForbiddenAccessException;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductDTO;
 import com.demo.model.company.Company;
 import com.demo.model.user.Role;
 import com.demo.model.user.User;
+import com.demo.repo.CompanyRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.demo.model.product.Product;
@@ -24,7 +29,7 @@ public class ProductService {
 	ProductRepo productRepo;
 
     @Autowired
-    CompanyService companyService;
+    CompanyRepo companyRepo;
 
     @Autowired
     UserRepo userRepo;
@@ -34,32 +39,32 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
 	}
 
-	public List<Product> findAllProducts(){
-		return productRepo.findAll();
-	}
-
-	public List<Product> findByCategory(String category){
-		return productRepo.findByCategory(category);
-	}
-
-    public List<Product> findProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        return productRepo.findByPriceBetween(minPrice, maxPrice);
+    public Page<Product> findAllProducts(Pageable pageable){
+        return productRepo.findAll(pageable);
     }
 
-    public List<Product> findProductsByStarMoreThan(Short star){
-        return productRepo.findDistinctByReviews_StarGreaterThan(star);
+    public Page<Product> findByCategory(String category, Pageable pageable){
+        return productRepo.findByCategory(category, pageable);
+    }
+
+    public Page<Product> findProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        return productRepo.findByPriceBetween(minPrice, maxPrice, pageable);
+    }
+
+    public Page<Product> findProductsByStarMoreThan(Short star, Pageable pageable) {
+        return productRepo.findByAverageStarGreaterThan(star, pageable);
     }
 
     public List<Product> findProductsById(List<Long> productIds){
         return productRepo.findAllById(productIds);
     }
 
-    public List<Product> findProductsByOwnerId(Long id){
-        return productRepo.findByOwner_UserId(id);
+    public Page<Product> findProductsByOwnerId(Long id, Pageable pageable){
+        return productRepo.findByOwner_UserId(id, pageable);
     }
 
-    public List<Product> findProductsByOwner(String username) {
-        return productRepo.findByOwner_Username(username);
+    public Page<Product> findProductsByOwnerUsername(String username, Pageable pageable) {
+        return productRepo.findByOwner_Username(username, pageable);
     }
 
     public String addOrUpdateImageUrl(Long productId, String imageUrl){
@@ -69,17 +74,20 @@ public class ProductService {
         return "Image added to Product: "+product.getProductName()+" Successfully";
     }
 
-    public String addProduct(ProductDTO productDTO, String username) {
-        long companyId = productDTO.getCompanyId();
-        Company company = companyService.findCompanyById(companyId);
+    public String addProduct(ProductDTO productDTO, Long userId) {
+        Long companyId = productDTO.getCompanyId();
+        Company company = companyRepo.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException(Company.class, "companyId", companyId));
         Product product = ProductConverter.toProduct(productDTO);
 
-        User user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(User.class, "username", username));
-        if(user.getRole() == Role.PRODUCT_OWNER && (companyId !=  user.getCompany().getCompanyId())){
-            throw new IllegalStateException("Company Mismatch");
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
+        if(user.getRole() == Role.CUSTOMER || user.getRole() == Role.DELIVERY_AGENT){
+            throw ForbiddenAccessException.forAction("Add", Product.class);
         }
-
+        else if(user.getRole() == Role.PRODUCT_OWNER){
+            product.setOwner(user);
+        }
         product.setCompany(company);
         product.setReviews(new ArrayList<>());
         productRepo.save(product);
@@ -116,12 +124,43 @@ public class ProductService {
         return "ProductId: "+oldProduct.getProductId()+" | Product: "+oldProduct.getProductName()+" Updated Successfully";
     }
 
-    public String addProductOwnerToProduct(Long userId, Long productId) {
+    public String addProductOwnerToProduct(Long productId, Long userId) {
+        User productOwner = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
+        if (productOwner.getRole() != Role.PRODUCT_OWNER) {
+            throw ForbiddenAccessException.forAction("owning", Product.class);
+        }
+        Product product = findProductById(productId);
+        if (product.getOwner() != null) {
+            throw new ConflictResourceException("Product already has an owner");
+        }
+        product.setOwner(productOwner);
+        productRepo.save(product);
+        return "Product Owner: " + productOwner.getUsername() + " added to Product: " + product.getProductName();
+    }
+
+    public String removeProductOwnerFromProduct(Long productId, Long userId) {
         User productOwner = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(User.class, "userId", userId));
         Product product = findProductById(productId);
-        product.setOwner(productOwner);
+        if (product.getOwner() == null) {
+            throw new ConflictResourceException("Product has no owner assigned");
+        }
+        if (!product.getOwner().equals(productOwner)) {
+            throw ForbiddenAccessException.forAction("removing", Product.class);
+        }
+        product.setOwner(null);
         productRepo.save(product);
-        return "Product Owner: "+productOwner.getUsername()+"Added To Product: "+product.getProductName();
+        return "Product Owner: " + productOwner.getUsername() + " removed from Product: " + product.getProductName();
+    }
+
+    public String changeProductCompany(Long productId, Long companyId) {
+        Company company = companyRepo.findById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException(Company.class, "companyId", companyId));
+
+        Product product = findProductById(productId);
+        product.setCompany(company);
+        productRepo.save(product);
+        return "Product: " + product.getProductName() + " assigned to Company: " + company.getCompany();
     }
 }

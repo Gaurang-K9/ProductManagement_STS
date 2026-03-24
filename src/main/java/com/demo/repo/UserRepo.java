@@ -1,10 +1,11 @@
 package com.demo.repo;
 
 import com.demo.model.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,7 +15,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     Boolean existsByUsername(String username);
 
-    List<User> findByAddresses_Pincode(String pincode);
+    Page<User> findByAddresses_Pincode(String pincode, Pageable pageable);
 
-    List<User> findByAddresses_City(String city);
+    Page<User> findByAddresses_City(String city, Pageable pageable);
 }

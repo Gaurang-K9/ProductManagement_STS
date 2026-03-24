@@ -1,5 +1,8 @@
 package com.demo.service;
 
+import com.demo.exception.BadRequestException;
+import com.demo.exception.ConflictResourceException;
+import com.demo.exception.ForbiddenAccessException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.order.Order;
 import com.demo.model.order.OrderStatus;
@@ -13,12 +16,13 @@ import com.demo.model.user.UserPrincipal;
 import com.demo.repo.ShipmentRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Service
 public class ShipmentService {
@@ -55,7 +59,7 @@ public class ShipmentService {
 
         Shipment shipment = new Shipment();
         if(deliveryAgent.getRole() != Role.DELIVERY_AGENT){
-            throw new IllegalArgumentException("Given user is not delivery agent");
+            throw new BadRequestException("User with ID " + deliveryAgentId + " is not a delivery agent");
         }
         shipment.setDeliveryAgent(deliveryAgent);
         shipment.setOrder(order);
@@ -88,12 +92,12 @@ public class ShipmentService {
         Long PrincipalAgentId = userPrincipal.user().getUserId();
 
         if (!shipmentAgentId.equals(PrincipalAgentId)) {
-            throw new IllegalArgumentException("Agent mismatch for the given tracking ID.");
+            throw ForbiddenAccessException.forAction("deliver", Shipment.class);
         }
 
         Order order = shipment.getOrder();
         if(order.getOrderStatus() == OrderStatus.CANCELLED){
-            throw new IllegalStateException("Cannot deliver cancelled order");
+            throw new ConflictResourceException("Cannot deliver cancelled order");
         }
 
         String orderCode = order.getOrderCode();
@@ -105,23 +109,31 @@ public class ShipmentService {
             paymentService.updatePayment(payment);
         }
         else if(payment.getPaymentStatus() != PaymentStatus.SUCCESS){
-            throw new IllegalStateException("Cannot deliver unpaid order.");
+            throw new ConflictResourceException("Cannot deliver unpaid order.");
         }
         order.setOrderStatus(OrderStatus.DELIVERED);
         inventoryService.updateStockAndReserveQuantity(order);
         return orderService.updateOrder(order);
     }
 
-    public List<Shipment> findShipmentsByPincode(String pincode){
-        return shipmentRepo.findByTrackingIdContaining(pincode);
+    public Page<Shipment> findShipmentsByPincode(String pincode, Pageable pageable){
+        return shipmentRepo.findByTrackingIdContaining(pincode, pageable);
     }
 
-    public List<Shipment> findShipmentsForSpecificDate(LocalDate localDate){
+    public Page<Shipment> findShipmentsBySpecificDate(LocalDate localDate, Pageable pageable){
         String date = localDate.format(DateTimeFormatter.BASIC_ISO_DATE);
-        return shipmentRepo.findByTrackingIdContaining(date);
+        return shipmentRepo.findByTrackingIdContaining(date, pageable);
     }
 
-    public List<Shipment> findShipmentsForDeliveryAgent(Long deliveryAgentId){
-        return shipmentRepo.findByDeliveryAgent_UserId(deliveryAgentId);
+    public Page<Shipment> findShipmentsByDeliveryAgent(Long deliveryAgentId, Pageable pageable){
+        return shipmentRepo.findByDeliveryAgent_UserId(deliveryAgentId, pageable);
+    }
+
+    public Page<Shipment> findShipmentsByOrderStatus(OrderStatus orderStatus, Pageable pageable){
+        return shipmentRepo.findByOrder_OrderStatus(orderStatus, pageable);
+    }
+
+    public Page<Shipment> findShipmentsByDeliveryAgentAndOrderStatus(Long deliveryAgentId, OrderStatus orderStatus, Pageable pageable){
+        return shipmentRepo.findByDeliveryAgent_UserIdAndOrder_OrderStatus(deliveryAgentId, orderStatus, pageable);
     }
 }

@@ -1,6 +1,8 @@
 package com.demo.config;
 
+import com.demo.filter.FirstLoginFilter;
 import com.demo.filter.JWTFilter;
+import com.demo.constants.AuthEndpointConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,18 +35,22 @@ public class SecurityConfig {
     @Autowired
     private JWTFilter jwtFilter;
 
+    @Autowired
+    private FirstLoginFilter firstLoginFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(requests ->  requests
-                        .requestMatchers("/register", "/login")
+                        .requestMatchers(AuthEndpointConstants.JWT_EXCLUDED)
                         .permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(firstLoginFilter, JWTFilter.class)
                 .build();
 
                 //.formLogin(Customizer.withDefaults())

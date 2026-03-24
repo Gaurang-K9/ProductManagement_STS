@@ -1,23 +1,23 @@
 package com.demo.service;
 
+import com.demo.exception.InvalidPasswordException;
 import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.address.Address;
 import com.demo.model.product.Product;
-import com.demo.model.review.Review;
-import com.demo.model.review.ReviewConverter;
-import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.*;
 import com.demo.repo.ProductRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -33,8 +33,8 @@ public class UserService {
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public List<User> findAllUsers() {
-        return userRepo.findAll();
+    public Page<User> findAllUsers(Pageable pageable) {
+        return userRepo.findAll(pageable);
     }
 
     public User findUserById(Long id){
@@ -51,8 +51,8 @@ public class UserService {
         return userRepo.existsById(id);
     }
 
-    public List<User> findUserByPincode(String pincode){
-        return userRepo.findByAddresses_Pincode(pincode);
+    public Page<User> findUserByPincode(String pincode, Pageable pageable){
+        return userRepo.findByAddresses_Pincode(pincode, pageable);
     }
 
     public void saveUser(User user){
@@ -88,45 +88,18 @@ public class UserService {
 
         // Validate old password
         if (!encoder.matches(dto.getOldPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Old password is incorrect");
+            throw new InvalidPasswordException("Old password is incorrect");
         }
 
         // Prevent same password reuse
         if (encoder.matches(dto.getNewPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("New password must be different from old password");
+            throw new InvalidPasswordException("New password must be different from old password");
         }
 
         user.setPassword(encoder.encode(dto.getNewPassword()));
         user.setFirstLogin(false);
         userRepo.save(user);
         return "Password Updated Successfully";
-    }
-
-    public String addUserReview(UserPrincipal userPrincipal, ReviewDTO reviewDTO) {
-        Long productId = reviewDTO.getProductId();
-        Long userId = userPrincipal.user().getUserId();
-        User user = findUserById(userId);
-        Product product = productRepo.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", productId));
-        Review review = ReviewConverter.toReview(reviewDTO);
-        review.setProductReview(product);
-        review.setUser(user);
-        return reviewService.addReview(review);
-    }
-
-    public String updateUserReview(UserPrincipal userPrincipal, Long reviewId, ReviewDTO reviewDTO){
-        Long userId = userPrincipal.user().getUserId();
-        User user = findUserById(userId);
-        Review review = reviewService.findReviewById(reviewId);
-        review.setReview(reviewDTO.getReview());
-        review.setStar(reviewDTO.getStar());
-        return reviewService.updateReview(review);
-    }
-
-    public String deleteUserReview(UserPrincipal userPrincipal, Long reviewId){
-        Long userId = userPrincipal.user().getUserId();
-        User user = findUserById(userId);
-        return reviewService.deleteReviewById(reviewId);
     }
 
     public List<Address> findUserAddress(UserPrincipal userPrincipal) {
@@ -209,5 +182,16 @@ public class UserService {
         user.getWishlist().clear();
         userRepo.save(user);
         return "Wishlist emptied successfully";
+    }
+
+    public UserLoginDTO adminResetPassword(String user){
+        User requestedUser = findUserByUsername(user);
+        String rawPassword = UUID.randomUUID().toString().substring(0, 10);
+
+        requestedUser.setPassword(encoder.encode(rawPassword));
+        requestedUser.setFirstLogin(true);
+        userRepo.save(requestedUser);
+
+        return new UserLoginDTO(requestedUser.getUsername(), rawPassword);
     }
 }

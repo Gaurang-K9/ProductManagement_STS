@@ -1,5 +1,9 @@
 package com.demo.model.user;
 
+import com.demo.constants.RegexConstants;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +15,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDTO {
 
+    @NotBlank(message = "Username cannot be empty")
+    @Pattern(regexp = RegexConstants.NO_SPACES, message = "Username cannot contain spaces")
     private String username;
+
+    @NotBlank(message = "Email cannot be empty")
+    @Pattern(regexp = RegexConstants.EMAIL, message = "Invalid email format")
     private String email;
+
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 8, max = 100)
+    @Pattern(regexp = RegexConstants.NO_SPACES, message = "Password cannot contain spaces")
     private String password;
 }

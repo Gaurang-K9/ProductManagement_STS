@@ -1,7 +1,9 @@
 package com.demo.service;
 
+import com.demo.exception.BadRequestException;
+import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
-import com.demo.exception.UnauthorizedAccessException;
+import com.demo.exception.ForbiddenAccessException;
 import com.demo.model.product.Product;
 import com.demo.model.order.*;
 import com.demo.model.user.User;
@@ -10,13 +12,15 @@ import com.demo.repo.OrderRepo;
 import com.demo.repo.ProductRepo;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-//TODO Use AuthenticationPrincipal instead of userId in OrderService
+
 @Log4j2
 @Service
 public class OrderService {
@@ -38,7 +42,7 @@ public class OrderService {
         order.setOrderAddress(shippingAddress);
         List<OrderItem> orderItems = new ArrayList<>();
         if (itemDTOS == null || itemDTOS.isEmpty()) {
-            throw new IllegalArgumentException("Order items cannot be empty");
+            throw new BadRequestException("Order items cannot be empty");
         }
         for(OrderItemDTO dto: itemDTOS){
             Product product = productRepo.findById(dto.getProductId())
@@ -102,20 +106,20 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
     }
 
-    public List<Order> findOrdersByPincode(String pincode) {
-        return orderRepo.findByOrderAddress_Pincode(pincode);
+    public Page<Order> findOrdersByPincode(String pincode, Pageable pageable) {
+        return orderRepo.findByOrderAddress_Pincode(pincode, pageable);
     }
 
-    public List<Order> findOrdersWithTotalMoreThan(BigDecimal total){
-        return orderRepo.findByTotalGreaterThan(total);
+    public Page<Order> findOrdersWithTotalMoreThan(BigDecimal total, Pageable pageable) {
+        return orderRepo.findByTotalGreaterThan(total, pageable);
     }
 
-    public List<Order> findOrdersPlacedBetween(LocalDateTime time1, LocalDateTime time2){
-        return orderRepo.findByOrderTimeBetween(time1, time2);
+    public Page<Order> findOrdersPlacedBetween(LocalDateTime time1, LocalDateTime time2, Pageable pageable){
+        return orderRepo.findByOrderTimeBetween(time1, time2, pageable);
     }
 
-    public List<Order> findOrdersByPincodeAndTotalMoreThan(String pincode, BigDecimal total){
-        return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total);
+    public Page<Order> findOrdersByPincodeAndTotalMoreThan(String pincode, BigDecimal total, Pageable pageable){
+        return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total, pageable);
     }
 
     public Order cancelOrder(UserPrincipal userPrincipal, String orderCode){
@@ -124,7 +128,7 @@ public class OrderService {
         User inputUser = userPrincipal.user();
         User orderUser = order.getUser();
         if(!inputUser.equals(orderUser)){
-            throw UnauthorizedAccessException.forAction("cancelOrder", Order.class);
+            throw ForbiddenAccessException.forAction("cancel", Order.class);
         }
         order.setOrderStatus(OrderStatus.CANCELLED);
         inventoryService.updateStockAndReserveQuantity(order);
@@ -137,10 +141,10 @@ public class OrderService {
         User inputUser = userPrincipal.user();
         User orderUser = order.getUser();
         if(!inputUser.equals(orderUser)){
-            throw UnauthorizedAccessException.forAction("returnOrder", Order.class);
+            throw ForbiddenAccessException.forAction("return", Order.class);
         }
         if(order.getOrderStatus() != OrderStatus.DELIVERED){
-            throw new IllegalStateException("Order has not been delivered");
+            throw new ConflictResourceException("Order has not been delivered");
         }
         order.setOrderStatus(OrderStatus.RETURNED);
         inventoryService.updateStockAndReserveQuantity(order);

@@ -4,12 +4,15 @@ import com.demo.model.inventory.Inventory;
 import com.demo.model.inventory.InventoryConverter;
 import com.demo.model.inventory.InventoryResponseDTO;
 import com.demo.service.InventoryService;
+import com.demo.shared.PageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/inventory")
@@ -47,9 +50,9 @@ public class InventoryController {
     }
 
     @GetMapping("/lowstock")
-    public ResponseEntity<List<InventoryResponseDTO>> findInventoryBelowThreshold(){
-        List<Inventory> inventories = inventoryService.findInventoryBelowThreshold();
-        List<InventoryResponseDTO> inventoryList = InventoryConverter.toInventoryResponseDTOList(inventories);
-        return ResponseEntity.status(HttpStatus.OK).body(inventoryList);
+    public PageResponse<InventoryResponseDTO> findInventoryBelowThreshold(
+            @PageableDefault(sort = "stockQuantity", direction = Sort.Direction.ASC) Pageable pageable){
+       return PageResponse.fromPage(inventoryService.findInventoryBelowThreshold(pageable)
+               .map(InventoryConverter::toInventoryResponseDTO));
     }
 }

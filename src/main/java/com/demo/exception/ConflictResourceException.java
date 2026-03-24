@@ -10,4 +10,8 @@ public class ConflictResourceException extends RuntimeException {
                 + resourceClass.getSimpleName()
                 + ": " + identifierName + " " + identifierValue;
     }
+
+    public ConflictResourceException(String message) {
+        super(message);
+    }
 }

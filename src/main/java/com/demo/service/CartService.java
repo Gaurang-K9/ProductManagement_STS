@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import com.demo.exception.BadRequestException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.address.Address;
 import com.demo.model.cart.CartItemConverter;
@@ -18,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-//TODO Use AuthenticationPrincipal instead of userId in CartService
+
 @Service
 public class CartService {
 
@@ -47,7 +48,7 @@ public class CartService {
         return cart.getCartItems();
     }
 
-    public List<CartItem> findCartItemsByCartId(Long cartId){
+    private List<CartItem> findCartItemsByCartId(Long cartId){
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException(Cart.class, "cartId", cartId));
         return cart.getCartItems();
@@ -114,7 +115,7 @@ public class CartService {
         List<CartItem> cartItems = findCartItemsByCartId(cartid);
 
         if (cartItems.isEmpty()) {
-            throw new IllegalArgumentException("Cannot place order with empty cart");
+            throw new BadRequestException("Cannot place order with empty cart");
         }
 
         if (user.getAddresses() == null || user.getAddresses().isEmpty()) {
