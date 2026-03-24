@@ -3,7 +3,11 @@ package com.demo.controller;
 import com.demo.model.order.*;
 import com.demo.model.user.UserPrincipal;
 import com.demo.service.OrderService;
+import com.demo.shared.PageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/order")
@@ -58,25 +61,24 @@ public class OrderController {
     }
 
     @GetMapping("/pincode")
-    public ResponseEntity<List<OrderDTO>> findOrdersByPincode(@RequestParam String code){
-        List<Order> pincodeOrders = orderService.findOrdersByPincode(code);
-        List<OrderDTO> orders = OrderConverter.toOrderDTOList(pincodeOrders);
-        return ResponseEntity.status(HttpStatus.OK).body(orders);
+    public PageResponse<OrderDTO> findOrdersByPincode(@RequestParam String code,
+            @PageableDefault(sort = "orderId", direction = Sort.Direction.ASC) Pageable pageable){
+        return PageResponse.fromPage(orderService.findOrdersByPincode(code, pageable)
+                .map(OrderConverter::toOrderDTO));
     }
 
     @GetMapping("/total/more")
-    public ResponseEntity<List<OrderDTO>> findOrdersWithTotalMoreThan(@RequestParam BigDecimal price){
-        List<Order> totalOrders = orderService.findOrdersWithTotalMoreThan(price);
-        List<OrderDTO> orders = OrderConverter.toOrderDTOList(totalOrders);
-        return ResponseEntity.status(HttpStatus.OK).body(orders);
+    public PageResponse<OrderDTO> findOrdersWithTotalMoreThan(@RequestParam BigDecimal price,
+           @PageableDefault(sort = "orderId", direction = Sort.Direction.ASC) Pageable pageable){
+        return PageResponse.fromPage(orderService.findOrdersWithTotalMoreThan(price, pageable)
+                .map(OrderConverter::toOrderDTO));
     }
 
     @GetMapping("/date")
-    public ResponseEntity<List<OrderDTO>> findOrdersPlacedBetween(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam LocalDateTime time1,
-                                                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam LocalDateTime time2){
-        List<Order> dateOrders = orderService.findOrdersPlacedBetween(time1, time2);
-        List<OrderDTO> orders = OrderConverter.toOrderDTOList(dateOrders);
-        return ResponseEntity.status(HttpStatus.OK).body(orders);
+    public PageResponse<OrderDTO> findOrdersPlacedBetween(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam LocalDateTime time1, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam LocalDateTime time2,
+            @PageableDefault(sort = "orderId", direction = Sort.Direction.ASC) Pageable pageable){
+        return PageResponse.fromPage(orderService.findOrdersPlacedBetween(time1, time2, pageable)
+                .map(OrderConverter::toOrderDTO));
     }
 
     @GetMapping("/code")
@@ -87,9 +89,9 @@ public class OrderController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<OrderDTO>> findOrdersByPincodeAndTotalMoreThan(@RequestParam String pincode, @RequestParam BigDecimal total) {
-        List<Order> orders = orderService.findOrdersByPincodeAndTotalMoreThan(pincode, total);
-        List<OrderDTO> response = OrderConverter.toOrderDTOList(orders);
-        return ResponseEntity.ok(response);
+    public PageResponse<OrderDTO> findOrdersByPincodeAndTotalMoreThan(@RequestParam String pincode, @RequestParam BigDecimal total,
+            @PageableDefault(sort = "orderId", direction = Sort.Direction.ASC) Pageable pageable){
+        return PageResponse.fromPage(orderService.findOrdersByPincodeAndTotalMoreThan(pincode, total, pageable)
+                .map(OrderConverter::toOrderDTO));
     }
 }

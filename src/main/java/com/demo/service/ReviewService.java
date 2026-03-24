@@ -14,8 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class ReviewService {
 
@@ -28,16 +26,9 @@ public class ReviewService {
     @Autowired
     UserRepo userRepo;
 
-    public List<Review> findAllReviews(){
-        return reviewRepo.findAll();
-    }
 
     public Page<Review> findAllReviews(Pageable pageable){
         return reviewRepo.findAll(pageable);
-    }
-
-    public List<Review> findReviewsByProductId(Long productId) {
-        return reviewRepo.findByProductReview_ProductId(productId);
     }
 
     public Page<Review> findReviewsByProductId(Long productId, Pageable pageable) {
@@ -73,11 +64,6 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
         reviewRepo.delete(review);
         return "Review deleted successfully";
-    }
-
-    public List<Review> findUserReviews(UserPrincipal userPrincipal){
-        Long userId = userPrincipal.user().getUserId();
-        return reviewRepo.findByUser_UserId(userId);
     }
 
     public Page<Review> findUserReviews(UserPrincipal userPrincipal, Pageable pageable){

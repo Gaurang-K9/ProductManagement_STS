@@ -39,32 +39,16 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
 	}
 
-	public List<Product> findAllProducts(){
-		return productRepo.findAll();
-	}
-
     public Page<Product> findAllProducts(Pageable pageable){
         return productRepo.findAll(pageable);
     }
-
-	public List<Product> findByCategory(String category){
-		return productRepo.findByCategory(category);
-	}
 
     public Page<Product> findByCategory(String category, Pageable pageable){
         return productRepo.findByCategory(category, pageable);
     }
 
-    public List<Product> findProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        return productRepo.findByPriceBetween(minPrice, maxPrice);
-    }
-
     public Page<Product> findProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
         return productRepo.findByPriceBetween(minPrice, maxPrice, pageable);
-    }
-
-    public List<Product> findProductsByStarMoreThan(Short star){
-        return productRepo.findDistinctByReviews_StarGreaterThan(star);
     }
 
     public Page<Product> findProductsByStarMoreThan(Short star, Pageable pageable) {
@@ -75,16 +59,8 @@ public class ProductService {
         return productRepo.findAllById(productIds);
     }
 
-    public List<Product> findProductsByOwnerId(Long id){
-        return productRepo.findByOwner_UserId(id);
-    }
-
     public Page<Product> findProductsByOwnerId(Long id, Pageable pageable){
         return productRepo.findByOwner_UserId(id, pageable);
-    }
-
-    public List<Product> findProductsByOwner(String username) {
-        return productRepo.findByOwner_Username(username);
     }
 
     public Page<Product> findProductsByOwnerUsername(String username, Pageable pageable) {

@@ -35,20 +35,12 @@ public class CompanyService {
                 .orElseThrow(() -> new ResourceNotFoundException(Company.class, "companyId", id));
 	}
 	
-	public List<Company> findAllCompanies(){
-		return companyRepo.findAll();
-	}
-
 	public Page<Company> findAllCompanies(Pageable pageable){
 		return companyRepo.findAll(pageable);
 	}
 	
-	public List<Company> findCompanyByType(String companyType){
-		return companyRepo.findByCompanyType(companyType);
-	}
-
-	public Page<Company> findCompanyByType(Pageable pageable, String companyType){
-		return companyRepo.findByCompanyType(pageable, companyType);
+	public Page<Company> findCompanyByType(String companyType, Pageable pageable){
+		return companyRepo.findByCompanyType(companyType, pageable);
 	}
 
 	public String addCompany(CompanyRequestDTO companyRequestDTO) {

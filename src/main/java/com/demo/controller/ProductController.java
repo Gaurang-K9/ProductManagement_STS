@@ -1,7 +1,6 @@
 package com.demo.controller;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 import com.demo.model.product.ProductConverter;
@@ -29,26 +28,12 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 
-	@GetMapping("/get-all")
-	public ResponseEntity<List<ProductResponseDTO>> findAllProducts(){
-        List<Product> productList = productService.findAllProducts();
-		List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
-        return ResponseEntity.status(HttpStatus.OK).body(products);
-	}
-
 	@GetMapping("/all")
 	public PageResponse<ProductResponseDTO> findAllProducts(
 			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
 		return PageResponse.fromPage(productService.findAllProducts(pageable).map(
 				ProductConverter::toProductResponseDTO
 		));
-	}
-
-	@GetMapping("/type")
-	public ResponseEntity<List<ProductResponseDTO>> findByCategory(@RequestParam String category){
-        List<Product> productList = productService.findByCategory(category);
-        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
-        return ResponseEntity.status(HttpStatus.OK).body(products);
 	}
 
 	@GetMapping("/category")
@@ -66,26 +51,12 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
-    @GetMapping("/product-price")
-    public ResponseEntity<List<ProductResponseDTO>> findProductsInPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max){
-        List<Product> productList = productService.findProductsInPriceRange(min, max);
-        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
-        return ResponseEntity.status(HttpStatus.OK).body(products);
-    }
-
 	@GetMapping("/price")
 	public PageResponse<ProductResponseDTO> findProductsInPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max,
 			@PageableDefault(sort = "price", direction = Sort.Direction.ASC) Pageable pageable){
 		return PageResponse.fromPage(productService.findProductsInPriceRange(min, max, pageable)
 				.map(ProductConverter::toProductResponseDTO));
 	}
-
-    @GetMapping("/stars")
-    public ResponseEntity<List<ProductResponseDTO>> findProductsByStarsMoreThan(@RequestParam Short s){
-        List<Product> productList = productService.findProductsByStarMoreThan(s);
-        List<ProductResponseDTO> products = ProductConverter.toProductResponseList(productList);
-        return ResponseEntity.status(HttpStatus.OK).body(products);
-    }
 
 	@GetMapping("/review")
 	public PageResponse<ProductResponseDTO> findProductsByAverageStarsMoreThan(@RequestParam Short stars,

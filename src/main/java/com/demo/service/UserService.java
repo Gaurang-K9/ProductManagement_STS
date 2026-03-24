@@ -5,11 +5,12 @@ import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.address.Address;
 import com.demo.model.product.Product;
-import com.demo.model.review.Review;
 import com.demo.model.user.*;
 import com.demo.repo.ProductRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +33,8 @@ public class UserService {
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public List<User> findAllUsers() {
-        return userRepo.findAll();
+    public Page<User> findAllUsers(Pageable pageable) {
+        return userRepo.findAll(pageable);
     }
 
     public User findUserById(Long id){
@@ -50,8 +51,8 @@ public class UserService {
         return userRepo.existsById(id);
     }
 
-    public List<User> findUserByPincode(String pincode){
-        return userRepo.findByAddresses_Pincode(pincode);
+    public Page<User> findUserByPincode(String pincode, Pageable pageable){
+        return userRepo.findByAddresses_Pincode(pincode, pageable);
     }
 
     public void saveUser(User user){
@@ -192,11 +193,5 @@ public class UserService {
         userRepo.save(requestedUser);
 
         return new UserLoginDTO(requestedUser.getUsername(), rawPassword);
-    }
-
-    public List<Review> findUserReviews(UserPrincipal userPrincipal) {
-        Long userId = userPrincipal.user().getUserId();
-        User user = findUserById(userId);
-        return user.getReviews();
     }
 }

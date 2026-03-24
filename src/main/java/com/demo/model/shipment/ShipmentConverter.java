@@ -13,6 +13,10 @@ public class ShipmentConverter {
         return shipmentResponseDTO;
     }
 
+    public static List<ShipmentResponseDTO> toShipmentResponseDTOList(List<Shipment> shipments){
+        return shipments.stream().map(ShipmentConverter::toShipmentResponseDTO).toList();
+    }
+
     public static ShipmentDeliveryAgentDTO toShipmentDeliveryAgentDTO(Shipment shipment){
         ShipmentDeliveryAgentDTO shipmentDeliveryAgentDTO = new ShipmentDeliveryAgentDTO();
         shipmentDeliveryAgentDTO.setTrackingId(shipment.getTrackingId());

@@ -6,17 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ReviewRepo extends JpaRepository<Review, Long> {
 
-    List<Review> findByProductReview_ProductId(Long productId);
-
     Page<Review> findByProductReview_ProductId(Long productId, Pageable pageable);
-
-    List<Review> findByUser_UserId(Long userId);
 
     Page<Review> findByUser_UserId(Long userId, Pageable pageable);
 

@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,19 +21,6 @@ public class ReviewController {
 
     @Autowired
     ReviewService reviewService;
-
-    @GetMapping("/get-all")
-    public ResponseEntity<List<ReviewResponseDTO>> findAllReviews(@RequestParam (required = false) Long productId){
-        List<Review> reviewList;
-        if(productId != null){
-            reviewList = reviewService.findReviewsByProductId(productId);
-        }
-        else {
-            reviewList = reviewService.findAllReviews();
-        }
-        List<ReviewResponseDTO> reviews = ReviewConverter.toReviewResponseList(reviewList);
-        return ResponseEntity.status(HttpStatus.OK).body(reviews);
-    }
 
     @GetMapping("/all")
     public PageResponse<ReviewResponseDTO> findAllReviews(
@@ -68,13 +54,6 @@ public class ReviewController {
         String response = reviewService.deleteReviewById(id);
         Map<String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
-    }
-
-    @GetMapping("/my-list")
-    public ResponseEntity<List<UserReviewResponseDTO>> findUserReviews(@AuthenticationPrincipal UserPrincipal userPrincipal){
-        List<Review> userReviews = reviewService.findUserReviews(userPrincipal);
-        List<UserReviewResponseDTO> response = ReviewConverter.toUserReviewsList(userReviews);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("/my")
