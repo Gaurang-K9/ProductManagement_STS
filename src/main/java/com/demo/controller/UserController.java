@@ -4,12 +4,15 @@ import com.demo.model.address.Address;
 import com.demo.model.product.Product;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductResponseDTO;
-import com.demo.model.review.ReviewDTO;
 import com.demo.model.user.*;
 import com.demo.service.UserService;
 import com.demo.service.auth.UserAuthService;
+import com.demo.shared.PageResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,9 +34,18 @@ public class UserController {
     UserAuthService userAuthService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserResponseDTO>> findAllUsers(){
-        List<UserResponseDTO> userList = UserConverter.toUserResponseList(userService.findAllUsers());
-        return new ResponseEntity<>(userList, HttpStatus.OK);
+    public PageResponse<UserResponseDTO> findAllUsers(
+            @PageableDefault(sort = "userId", direction = Sort.Direction.ASC) Pageable pageable
+    ){
+        return PageResponse.fromPage(userService.findAllUsers(pageable)
+                .map(UserConverter::toUserResponseDTO));
+    }
+
+    @GetMapping("/my-profile")
+    public ResponseEntity<UserProfileDTO> getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        User user = userService.findUserById(userPrincipal.user().getUserId());
+        UserProfileDTO responseDTO = UserConverter.toUserProfileDTO(user);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
     }
 
     @GetMapping("/{id}")
@@ -60,27 +72,6 @@ public class UserController {
     @PutMapping("/update/password")
     public ResponseEntity<Map <String, String>> updatePassword(@Valid @RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updatePassword(dto, userPrincipal);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
-    }
-
-    @PostMapping("/review")
-    public ResponseEntity<Map <String, String>> addReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ReviewDTO reviewDTO){
-        String response = userService.addUserReview(userPrincipal, reviewDTO);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
-    }
-
-    @PutMapping("/review/{reviewid}")
-    public ResponseEntity<Map <String, String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid, @RequestBody ReviewDTO reviewDTO){
-        String response = userService.updateUserReview(userPrincipal, reviewid, reviewDTO);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
-    }
-
-    @DeleteMapping("/review/{reviewid}")
-    public ResponseEntity<Map <String, String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid) {
-        String response = userService.deleteUserReview(userPrincipal, reviewid);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }

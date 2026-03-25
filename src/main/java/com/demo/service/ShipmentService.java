@@ -16,12 +16,13 @@ import com.demo.model.user.UserPrincipal;
 import com.demo.repo.ShipmentRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Service
 public class ShipmentService {
@@ -115,24 +116,24 @@ public class ShipmentService {
         return orderService.updateOrder(order);
     }
 
-    public List<Shipment> findShipmentsByPincode(String pincode){
-        return shipmentRepo.findByTrackingIdContaining(pincode);
+    public Page<Shipment> findShipmentsByPincode(String pincode, Pageable pageable){
+        return shipmentRepo.findByTrackingIdContaining(pincode, pageable);
     }
 
-    public List<Shipment> findShipmentsBySpecificDate(LocalDate localDate){
+    public Page<Shipment> findShipmentsBySpecificDate(LocalDate localDate, Pageable pageable){
         String date = localDate.format(DateTimeFormatter.BASIC_ISO_DATE);
-        return shipmentRepo.findByTrackingIdContaining(date);
+        return shipmentRepo.findByTrackingIdContaining(date, pageable);
     }
 
-    public List<Shipment> findShipmentsByDeliveryAgent(Long deliveryAgentId){
-        return shipmentRepo.findByDeliveryAgent_UserId(deliveryAgentId);
+    public Page<Shipment> findShipmentsByDeliveryAgent(Long deliveryAgentId, Pageable pageable){
+        return shipmentRepo.findByDeliveryAgent_UserId(deliveryAgentId, pageable);
     }
 
-    public List<Shipment> findShipmentsByOrderStatus(OrderStatus orderStatus){
-        return shipmentRepo.findByOrder_OrderStatus(orderStatus);
+    public Page<Shipment> findShipmentsByOrderStatus(OrderStatus orderStatus, Pageable pageable){
+        return shipmentRepo.findByOrder_OrderStatus(orderStatus, pageable);
     }
 
-    public List<Shipment> findShipmentsByDeliveryAgentAndOrderStatus(Long deliveryAgentId, OrderStatus orderStatus){
-        return shipmentRepo.findByDeliveryAgent_UserIdAndOrder_OrderStatus(deliveryAgentId, orderStatus);
+    public Page<Shipment> findShipmentsByDeliveryAgentAndOrderStatus(Long deliveryAgentId, OrderStatus orderStatus, Pageable pageable){
+        return shipmentRepo.findByDeliveryAgent_UserIdAndOrder_OrderStatus(deliveryAgentId, orderStatus, pageable);
     }
 }

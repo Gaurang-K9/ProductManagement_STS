@@ -3,6 +3,7 @@ package com.demo.model.user;
 import com.demo.constants.RegexConstants;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,7 @@ public class UserDTO {
     private String email;
 
     @NotBlank(message = "Password cannot be empty")
+    @Size(min = 8, max = 100)
     @Pattern(regexp = RegexConstants.NO_SPACES, message = "Password cannot contain spaces")
     private String password;
 }

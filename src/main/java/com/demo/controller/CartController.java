@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-//TODO Add AuthenticationPrincipal instead of userId in CartController
+
 @RestController
 @RequestMapping("/cart")
 @CrossOrigin
@@ -28,21 +28,21 @@ public class CartController {
          return ResponseEntity.status(HttpStatus.OK).body(cartDTO);
     }
 
-    @DeleteMapping("/{id}/empty")
+    @DeleteMapping("/{cartid}/empty")
     public ResponseEntity<Map <String, String>> emptyCartById(@PathVariable Long id){
         String response = cartService.emptyCart(id);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{cartid}/add-items")
     public ResponseEntity<Map <String, String>> addItemsToCart(@RequestBody List<OrderItemDTO> items, @PathVariable Long id){
         String response = cartService.addItemsToCart(items, id);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
-    @PostMapping("/user")
+    @PostMapping("/user/add-items")
     public ResponseEntity<Map <String, String>> addItemsToUserCart(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody List<OrderItemDTO> items){
         String response = cartService.addItemsToUserCart(userPrincipal, items);
         Map <String, String> body = Map.of("response", response);

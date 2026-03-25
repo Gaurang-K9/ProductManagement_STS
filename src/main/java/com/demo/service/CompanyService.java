@@ -11,6 +11,8 @@ import com.demo.model.user.User;
 import com.demo.repo.ProductRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.demo.model.company.Company;
@@ -33,12 +35,12 @@ public class CompanyService {
                 .orElseThrow(() -> new ResourceNotFoundException(Company.class, "companyId", id));
 	}
 	
-	public List<Company> findAllCompanies(){
-		return companyRepo.findAll();
+	public Page<Company> findAllCompanies(Pageable pageable){
+		return companyRepo.findAll(pageable);
 	}
 	
-	public List<Company> findCompanyByType(String company_type){
-		return companyRepo.findByCompanyType(company_type);
+	public Page<Company> findCompanyByType(String companyType, Pageable pageable){
+		return companyRepo.findByCompanyType(companyType, pageable);
 	}
 
 	public String addCompany(CompanyRequestDTO companyRequestDTO) {

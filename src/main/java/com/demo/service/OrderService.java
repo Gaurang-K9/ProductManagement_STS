@@ -12,13 +12,15 @@ import com.demo.repo.OrderRepo;
 import com.demo.repo.ProductRepo;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-//TODO Use AuthenticationPrincipal instead of userId in OrderService
+
 @Log4j2
 @Service
 public class OrderService {
@@ -104,20 +106,20 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
     }
 
-    public List<Order> findOrdersByPincode(String pincode) {
-        return orderRepo.findByOrderAddress_Pincode(pincode);
+    public Page<Order> findOrdersByPincode(String pincode, Pageable pageable) {
+        return orderRepo.findByOrderAddress_Pincode(pincode, pageable);
     }
 
-    public List<Order> findOrdersWithTotalMoreThan(BigDecimal total){
-        return orderRepo.findByTotalGreaterThan(total);
+    public Page<Order> findOrdersWithTotalMoreThan(BigDecimal total, Pageable pageable) {
+        return orderRepo.findByTotalGreaterThan(total, pageable);
     }
 
-    public List<Order> findOrdersPlacedBetween(LocalDateTime time1, LocalDateTime time2){
-        return orderRepo.findByOrderTimeBetween(time1, time2);
+    public Page<Order> findOrdersPlacedBetween(LocalDateTime time1, LocalDateTime time2, Pageable pageable){
+        return orderRepo.findByOrderTimeBetween(time1, time2, pageable);
     }
 
-    public List<Order> findOrdersByPincodeAndTotalMoreThan(String pincode, BigDecimal total){
-        return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total);
+    public Page<Order> findOrdersByPincodeAndTotalMoreThan(String pincode, BigDecimal total, Pageable pageable){
+        return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total, pageable);
     }
 
     public Order cancelOrder(UserPrincipal userPrincipal, String orderCode){

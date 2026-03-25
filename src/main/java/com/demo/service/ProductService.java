@@ -15,6 +15,8 @@ import com.demo.model.user.User;
 import com.demo.repo.CompanyRepo;
 import com.demo.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.demo.model.product.Product;
@@ -37,32 +39,32 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
 	}
 
-	public List<Product> findAllProducts(){
-		return productRepo.findAll();
-	}
-
-	public List<Product> findByCategory(String category){
-		return productRepo.findByCategory(category);
-	}
-
-    public List<Product> findProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-        return productRepo.findByPriceBetween(minPrice, maxPrice);
+    public Page<Product> findAllProducts(Pageable pageable){
+        return productRepo.findAll(pageable);
     }
 
-    public List<Product> findProductsByStarMoreThan(Short star){
-        return productRepo.findDistinctByReviews_StarGreaterThan(star);
+    public Page<Product> findByCategory(String category, Pageable pageable){
+        return productRepo.findByCategory(category, pageable);
+    }
+
+    public Page<Product> findProductsInPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        return productRepo.findByPriceBetween(minPrice, maxPrice, pageable);
+    }
+
+    public Page<Product> findProductsByStarMoreThan(Short star, Pageable pageable) {
+        return productRepo.findByAverageStarGreaterThan(star, pageable);
     }
 
     public List<Product> findProductsById(List<Long> productIds){
         return productRepo.findAllById(productIds);
     }
 
-    public List<Product> findProductsByOwnerId(Long id){
-        return productRepo.findByOwner_UserId(id);
+    public Page<Product> findProductsByOwnerId(Long id, Pageable pageable){
+        return productRepo.findByOwner_UserId(id, pageable);
     }
 
-    public List<Product> findProductsByOwner(String username) {
-        return productRepo.findByOwner_Username(username);
+    public Page<Product> findProductsByOwnerUsername(String username, Pageable pageable) {
+        return productRepo.findByOwner_Username(username, pageable);
     }
 
     public String addOrUpdateImageUrl(Long productId, String imageUrl){

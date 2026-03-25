@@ -9,6 +9,8 @@ import com.demo.model.order.OrderItem;
 import com.demo.model.product.Product;
 import com.demo.repo.InventoryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -150,8 +152,7 @@ public class InventoryService {
         return updateInventory(inventory);
     }
 
-    public List<Inventory> findInventoryBelowThreshold(){
-        return inventoryRepo.findWithLowStock();
+    public Page<Inventory> findInventoryBelowThreshold(Pageable pageable){
+        return inventoryRepo.findWithLowStock(pageable);
     }
-
 }
