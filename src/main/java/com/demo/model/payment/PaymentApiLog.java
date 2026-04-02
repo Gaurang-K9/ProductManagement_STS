@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Getter
@@ -26,7 +26,7 @@ public class PaymentApiLog {
     private Integer responseStatus;
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
-    private LocalDateTime responseAt;
+    private Instant responseAt;
     @ManyToOne
     @JoinColumn(name = "payment_id")
     private Payment payment;

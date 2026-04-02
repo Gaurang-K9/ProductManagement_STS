@@ -6,7 +6,7 @@ import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductResponseDTO;
 import com.demo.model.user.*;
 import com.demo.service.UserService;
-import com.demo.service.auth.UserAuthService;
+import com.demo.service.auth.AuthService;
 import com.demo.shared.PageResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class UserController {
     UserService userService;
 
     @Autowired
-    UserAuthService userAuthService;
+    AuthService authService;
 
     @GetMapping("/all")
     public PageResponse<UserResponseDTO> findAllUsers(
@@ -57,7 +57,7 @@ public class UserController {
 
     @PostMapping("/add")    //For Testing
     public ResponseEntity<Map <String, String>> addUser(@RequestBody UserDTO userDTO){
-        String response = userAuthService.register(userDTO);
+        String response = authService.register(userDTO);
         Map <String, String> body = Map.of("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }

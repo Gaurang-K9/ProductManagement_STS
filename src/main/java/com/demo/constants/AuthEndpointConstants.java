@@ -7,6 +7,7 @@ public final class AuthEndpointConstants {
     public static final String[] JWT_EXCLUDED = {
             "/login",
             "/register",
+            "/refresh"
     };
 
     public static final String[] FIRST_LOGIN_ALLOWED = {

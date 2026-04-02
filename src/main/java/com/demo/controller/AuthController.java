@@ -1,9 +1,10 @@
 package com.demo.controller;
 
 import com.demo.model.auth.AuthResponse;
+import com.demo.model.auth.RefreshTokenRequest;
 import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserLoginDTO;
-import com.demo.service.auth.UserAuthService;
+import com.demo.service.auth.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.util.Map;
 public class AuthController {
 
     @Autowired
-    UserAuthService userService;
+    AuthService authService;
 
     @RequestMapping(value = {"/", "/?continue"})
     public void sendRedirect(HttpServletResponse httpServletResponse) throws IOException {
@@ -31,15 +32,21 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> userLogin(@RequestBody UserLoginDTO loginDTO){
-        AuthResponse response = userService.login(loginDTO);
+        AuthResponse response = authService.login(loginDTO);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> userRegister(@Valid @RequestBody UserDTO userDTO){
-        String response = userService.register(userDTO);
+        String response = authService.register(userDTO);
         Map<String, String> body = new HashMap<>();
         body.put("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest refreshToken){
+        AuthResponse response = authService.refreshToken(refreshToken);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

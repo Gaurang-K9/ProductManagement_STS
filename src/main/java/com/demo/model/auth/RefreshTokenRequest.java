@@ -1,6 +1,5 @@
 package com.demo.model.auth;
 
-import com.demo.model.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,9 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthResponse {
-    private String accessToken;
+public class RefreshTokenRequest {
+
     private String refreshToken;
-    private boolean firstLogin;
-    private Role role;
 }

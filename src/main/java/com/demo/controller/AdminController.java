@@ -6,7 +6,7 @@ import com.demo.model.user.UserLoginDTO;
 import com.demo.service.CompanyService;
 import com.demo.service.ProductService;
 import com.demo.service.UserService;
-import com.demo.service.auth.UserAuthService;
+import com.demo.service.auth.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +21,7 @@ import java.util.Map;
 public class AdminController {
 
     @Autowired
-    UserAuthService userAuthService;
+    AuthService authService;
 
     @Autowired
     UserService userService;
@@ -34,7 +34,7 @@ public class AdminController {
 
     @PostMapping("/users/create/admin")
     public ResponseEntity<Map <String, String>> createAdmin(@Valid @RequestBody SimpleUserDTO userDTO){
-        String response = userAuthService.createBackendRole(userDTO, Role.ADMIN);
+        String response = authService.createBackendRole(userDTO, Role.ADMIN);
         Map<String, String> body = new HashMap<>();
         body.put("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
@@ -42,7 +42,7 @@ public class AdminController {
 
     @PostMapping("/users/create/product-owner")
     public ResponseEntity<Map <String, String>> createProductOwner(@Valid @RequestBody SimpleUserDTO userDTO){
-        String response = userAuthService.createBackendRole(userDTO, Role.PRODUCT_OWNER);
+        String response = authService.createBackendRole(userDTO, Role.PRODUCT_OWNER);
         Map<String, String> body = new HashMap<>();
         body.put("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
@@ -50,7 +50,7 @@ public class AdminController {
 
     @PostMapping("/users/create/delivery-agent")
     public ResponseEntity<Map <String, String>> createDeliveryAgent(@Valid @RequestBody SimpleUserDTO userDTO){
-        String response = userAuthService.createBackendRole(userDTO, Role.DELIVERY_AGENT);
+        String response = authService.createBackendRole(userDTO, Role.DELIVERY_AGENT);
         Map<String, String> body = new HashMap<>();
         body.put("response", response);
         return ResponseEntity.status(HttpStatus.CREATED).body(body);

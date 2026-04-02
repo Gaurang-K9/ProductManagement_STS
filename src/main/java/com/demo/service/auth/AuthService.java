@@ -1,7 +1,10 @@
 package com.demo.service.auth;
 
+import com.demo.exception.BadRequestException;
 import com.demo.exception.ConflictResourceException;
 import com.demo.model.auth.AuthResponse;
+import com.demo.model.auth.RefreshToken;
+import com.demo.model.auth.RefreshTokenRequest;
 import com.demo.model.user.*;
 import com.demo.repo.UserRepo;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +17,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
-public class UserAuthService {
+public class AuthService {
 
     @Autowired
     UserRepo userRepo;
@@ -27,6 +32,9 @@ public class UserAuthService {
 
     @Autowired
     AuthenticationManager authenticationManager;
+
+    @Autowired
+    RefreshTokenService refreshTokenService;
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
@@ -41,8 +49,8 @@ public class UserAuthService {
         if(response){
             throw new ConflictResourceException(User.class, "userName", userDTO.getUsername());
         }
-        User saveUser = UserConverter.toUser(userDTO);
-        saveUser(saveUser);
+        User user = UserConverter.toUser(userDTO);
+        saveUser(user);
         return "User Registered successfully";
     }
 
@@ -51,13 +59,17 @@ public class UserAuthService {
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword()));
 
         User user = userRepo.findByUsername(loginDTO.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-        String token = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
-        return new AuthResponse(token, user.isFirstLogin(),  user.getRole());
+        refreshTokenService.findByUser(user).ifPresent(refreshTokenService::delete);
+
+        String accessToken = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        return new AuthResponse(accessToken, refreshToken.getToken(), user.isFirstLogin(), user.getRole());
     }
 
-    public String randomPasswordGenerator(){
+    private String randomPasswordGenerator(){
         char[] possibleCharacters = ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_=+[{]}\\|;:\'\",<.>/?").toCharArray();
         int randomStrLength = 10;
         return RandomStringUtils.random( randomStrLength, 0, possibleCharacters.length-1, false, false, possibleCharacters, new SecureRandom() );
@@ -79,5 +91,21 @@ public class UserAuthService {
         userRepo.save(user);
         log.info("New {} created | Username: {} | Temp Password: {}",role, user.getUsername(), tempPassword);
         return "Username: "+user.getUsername()+"| Password: "+tempPassword+" | Role: " + role;
+    }
+
+    public AuthResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        String requestRefreshToken = refreshTokenRequest.getRefreshToken();
+        RefreshToken refreshToken = refreshTokenService.findByToken(requestRefreshToken);
+
+        refreshTokenService.verifyExpiration(refreshToken);
+
+        refreshToken.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));
+        refreshTokenService.save(refreshToken);
+
+        User user = refreshToken.getUser();
+
+        String newJwtToken = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
+
+        return new AuthResponse(newJwtToken, requestRefreshToken, user.isFirstLogin(), user.getRole());
     }
 }
