@@ -54,7 +54,7 @@ public class AuthService {
         return "User Registered successfully";
     }
 
-    public AuthResponse login(UserLoginDTO loginDTO) {
+    public AuthResponse login(UserLoginDTO loginDTO){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword()));
 
@@ -93,7 +93,7 @@ public class AuthService {
         return "Username: "+user.getUsername()+"| Password: "+tempPassword+" | Role: " + role;
     }
 
-    public AuthResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+    public AuthResponse refreshToken(RefreshTokenRequest refreshTokenRequest){
         String requestRefreshToken = refreshTokenRequest.getRefreshToken();
         RefreshToken refreshToken = refreshTokenService.findByToken(requestRefreshToken);
 
@@ -107,5 +107,12 @@ public class AuthService {
         String newJwtToken = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
 
         return new AuthResponse(newJwtToken, requestRefreshToken, user.isFirstLogin(), user.getRole());
+    }
+
+    public String logout(UserPrincipal userPrincipal){
+        Long userId = userPrincipal.user().getUserId();
+        RefreshToken refreshToken = refreshTokenService.findByUserId(userId);
+        refreshTokenService.delete(refreshToken);
+        return "Logged out successfully";
     }
 }

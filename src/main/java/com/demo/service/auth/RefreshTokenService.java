@@ -1,6 +1,7 @@
 package com.demo.service.auth;
 
 import com.demo.exception.BadRequestException;
+import com.demo.exception.ResourceNotFoundException;
 import com.demo.model.auth.RefreshToken;
 import com.demo.model.user.User;
 import com.demo.repo.RefreshTokenRepo;
@@ -35,6 +36,11 @@ public class RefreshTokenService {
 
     public Optional<RefreshToken> findByUser(User user) {
         return refreshTokenRepo.findByUser(user);
+    }
+
+    public RefreshToken findByUserId(Long userId) {
+        return refreshTokenRepo.findByUser_UserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(RefreshToken.class, "userId", userId));
     }
 
     public void verifyExpiration(RefreshToken token) {

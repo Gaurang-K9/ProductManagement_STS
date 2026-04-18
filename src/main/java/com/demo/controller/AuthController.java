@@ -4,12 +4,14 @@ import com.demo.model.auth.AuthResponse;
 import com.demo.model.auth.RefreshTokenRequest;
 import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserLoginDTO;
+import com.demo.model.user.UserPrincipal;
 import com.demo.service.auth.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,5 +50,13 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest refreshToken){
         AuthResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> userLogout(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        String response = authService.logout(userPrincipal);
+        Map<String, String> body = new HashMap<>();
+        body.put("response", response);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 }

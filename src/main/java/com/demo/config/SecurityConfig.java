@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(firstLoginFilter, JWTFilter.class)
+                .logout(AbstractHttpConfigurer::disable)   //Disable to allow custom logout and not depend on Spring Security Logout
                 .build();
 
                 //.formLogin(Customizer.withDefaults())
