@@ -6,6 +6,7 @@ import com.demo.model.user.UserDTO;
 import com.demo.model.user.UserLoginDTO;
 import com.demo.model.user.UserPrincipal;
 import com.demo.service.auth.AuthService;
+import com.demo.shared.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 public class AuthController {
@@ -32,31 +31,27 @@ public class AuthController {
         httpServletResponse.sendRedirect("/swagger-ui.html");
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> userLogin(@RequestBody UserLoginDTO loginDTO){
+    @PostMapping("/auth/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> userLogin(@RequestBody UserLoginDTO loginDTO){
         AuthResponse response = authService.login(loginDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> userRegister(@Valid @RequestBody UserDTO userDTO){
+    @PostMapping("/auth/register")
+    public ResponseEntity<ApiResponse<String>> userRegister(@Valid @RequestBody UserDTO userDTO){
         String response = authService.register(userDTO);
-        Map<String, String> body = new HashMap<>();
-        body.put("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest refreshToken){
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@RequestBody RefreshTokenRequest refreshToken){
         AuthResponse response = authService.refreshToken(refreshToken);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> userLogout(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    @PostMapping("/auth/logout")
+    public ResponseEntity<ApiResponse<String>> userLogout(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = authService.logout(userPrincipal);
-        Map<String, String> body = new HashMap<>();
-        body.put("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 }

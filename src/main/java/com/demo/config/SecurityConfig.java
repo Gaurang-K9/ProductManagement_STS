@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -27,6 +28,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -38,23 +40,31 @@ public class SecurityConfig {
     @Autowired
     private FirstLoginFilter firstLoginFilter;
 
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(requests ->  requests
-                        .requestMatchers(AuthEndpointConstants.JWT_EXCLUDED)
-                        .permitAll()
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(AuthEndpointConstants.JWT_EXCLUDED).permitAll()        //Allows these api endpoints to be bypassed
+                        .requestMatchers("/api/**", "/auth/**").authenticated()      //Only the following requests will be authenticated
+                        .anyRequest().permitAll()                                            //Rest all requests can pass through
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(firstLoginFilter, JWTFilter.class)
-                .logout(AbstractHttpConfigurer::disable)   //Disable to allow custom logout and not depend on Spring Security Logout
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)   //Set custom JWT Filter before UsernamePasswordAuthentication filter
+                .addFilterAfter(firstLoginFilter, JWTFilter.class)                       //Set custom firstLogin after custom JWTFilter
+                .logout(AbstractHttpConfigurer::disable)                                //Disable to allow custom logout and not depend on Spring Security Logout
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)     //Custom Handlers for handling AuthenticationException
+                        .accessDeniedHandler(customAccessDeniedHandler))             //Custom Handlers for handling AccessDeniedException
                 .build();
-
-                //.formLogin(Customizer.withDefaults())
     }
 
     @Bean
@@ -80,7 +90,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
         return configuration.getAuthenticationManager();
     }
 

@@ -10,6 +10,7 @@ import com.demo.model.shipment.ShipmentDeliveryAgentDTO;
 import com.demo.model.shipment.ShipmentResponseDTO;
 import com.demo.model.user.UserPrincipal;
 import com.demo.service.ShipmentService;
+import com.demo.shared.ApiResponse;
 import com.demo.shared.PageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -24,74 +25,85 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/shipment")
+@RequestMapping("/api/shipment")
 public class ShipmentController {
 
     @Autowired
     ShipmentService shipmentService;
 
     @GetMapping("/find")
-    public ResponseEntity<ShipmentResponseDTO> findByTrackingId(@RequestParam String trackingId){
+    public ResponseEntity<ApiResponse<ShipmentResponseDTO>> findByTrackingId(@RequestParam String trackingId){
         Shipment shipment = shipmentService.findShipmentByTrackingId(trackingId);
         ShipmentResponseDTO responseDTO = ShipmentConverter.toShipmentResponseDTO(shipment);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ShipmentResponseDTO> findByShipmentId(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<ShipmentResponseDTO>> findByShipmentId(@PathVariable Long id){
         Shipment shipment = shipmentService.findShipmentById(id);
         ShipmentResponseDTO responseDTO = ShipmentConverter.toShipmentResponseDTO(shipment);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
     }
 
     @PostMapping("/create/{orderid}")
-    public ResponseEntity<ShipmentResponseDTO> createShipment(@PathVariable Long orderid ,@RequestParam Long agentId){
+    public ResponseEntity<ApiResponse<ShipmentResponseDTO>> createShipment(@PathVariable Long orderid ,@RequestParam Long agentId){
         Shipment shipment = shipmentService.createShipment(orderid, agentId);
         ShipmentResponseDTO responseDTO = ShipmentConverter.toShipmentResponseDTO(shipment);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(responseDTO));
     }
 
     @PatchMapping("/order/deliver")
-    public ResponseEntity<OrderResponseDTO> deliverOrder(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String trackingId){
+    public ResponseEntity<ApiResponse<OrderResponseDTO>> deliverOrder(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String trackingId){
         Order order = shipmentService.deliverOrder(trackingId, userPrincipal);
         OrderResponseDTO responseDTO = OrderConverter.toOrderResponseDTO(order);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        String message = "Delivered order successfully ";
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
     }
 
     @GetMapping("/find/pincode")
-    public PageResponse<ShipmentResponseDTO> findShipmentsByPincode(@RequestParam String pincode,
+    public ResponseEntity<ApiResponse<PageResponse<ShipmentResponseDTO>>> findShipmentsByPincode(@RequestParam String pincode,
             @PageableDefault(sort = "shippedAt", direction = Sort.Direction.DESC) Pageable pageable){
-        return PageResponse.fromPage(shipmentService.findShipmentsByPincode(pincode, pageable)
+        var response = PageResponse
+                .fromPage(shipmentService.findShipmentsByPincode(pincode, pageable)
                 .map(ShipmentConverter::toShipmentResponseDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @GetMapping("/find/date")
-    public PageResponse<ShipmentResponseDTO> findShipmentsByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date,
+    public ResponseEntity<ApiResponse<PageResponse<ShipmentResponseDTO>>> findShipmentsByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate date,
             @PageableDefault(sort = "shippedAt", direction = Sort.Direction.DESC) Pageable pageable){
-        return PageResponse.fromPage(shipmentService.findShipmentsBySpecificDate(date, pageable)
+        var response = PageResponse
+                .fromPage(shipmentService.findShipmentsBySpecificDate(date, pageable)
                 .map(ShipmentConverter::toShipmentResponseDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @GetMapping("/find/status")
-    public PageResponse<ShipmentResponseDTO> findShipmentsByDate(@RequestParam String status,
+    public ResponseEntity<ApiResponse<PageResponse<ShipmentResponseDTO>>> findShipmentsByDate(@RequestParam String status,
             @PageableDefault(sort = "shippedAt", direction = Sort.Direction.DESC) Pageable pageable){
-        return PageResponse.fromPage(shipmentService.findShipmentsByOrderStatus(OrderStatus.valueOf(status), pageable)
+        var response = PageResponse
+                .fromPage(shipmentService.findShipmentsByOrderStatus(OrderStatus.valueOf(status), pageable)
                 .map(ShipmentConverter::toShipmentResponseDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @GetMapping("/find/my-orders")
-    public PageResponse<ShipmentDeliveryAgentDTO> findDeliveryAgentOrders(@AuthenticationPrincipal UserPrincipal userPrincipal,
+    public ResponseEntity<ApiResponse<PageResponse<ShipmentDeliveryAgentDTO>>> findDeliveryAgentOrders(@AuthenticationPrincipal UserPrincipal userPrincipal,
             @PageableDefault(sort = "shippedAt", direction = Sort.Direction.ASC) Pageable pageable){
         Long agentId = userPrincipal.user().getUserId();
-        return PageResponse.fromPage(shipmentService.findShipmentsByDeliveryAgent(agentId, pageable)
+        var response = PageResponse
+                .fromPage(shipmentService.findShipmentsByDeliveryAgent(agentId, pageable)
                 .map(ShipmentConverter::toShipmentDeliveryAgentDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @GetMapping("/find/my-orders/status")
-    public PageResponse<ShipmentDeliveryAgentDTO> findDeliveryAgentOrdersWithStatus(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String status,
+    public ResponseEntity<ApiResponse<PageResponse<ShipmentDeliveryAgentDTO>>> findDeliveryAgentOrdersWithStatus(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam String status,
             @PageableDefault(sort = "shippedAt", direction = Sort.Direction.ASC) Pageable pageable){
         Long agentId = userPrincipal.user().getUserId();
-        return PageResponse.fromPage(shipmentService.findShipmentsByDeliveryAgentAndOrderStatus(agentId, OrderStatus.valueOf(status), pageable)
+        var response = PageResponse
+                .fromPage(shipmentService.findShipmentsByDeliveryAgentAndOrderStatus(agentId, OrderStatus.valueOf(status), pageable)
                 .map(ShipmentConverter::toShipmentDeliveryAgentDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 }

@@ -7,17 +7,17 @@ import com.demo.service.CompanyService;
 import com.demo.service.ProductService;
 import com.demo.service.UserService;
 import com.demo.service.auth.AuthService;
+import com.demo.shared.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
     @Autowired
@@ -33,32 +33,27 @@ public class AdminController {
     ProductService productService;
 
     @PostMapping("/users/create/admin")
-    public ResponseEntity<Map <String, String>> createAdmin(@Valid @RequestBody SimpleUserDTO userDTO){
+    public ResponseEntity<ApiResponse<String>> createAdmin(@Valid @RequestBody SimpleUserDTO userDTO){
         String response = authService.createBackendRole(userDTO, Role.ADMIN);
-        Map<String, String> body = new HashMap<>();
-        body.put("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
     @PostMapping("/users/create/product-owner")
-    public ResponseEntity<Map <String, String>> createProductOwner(@Valid @RequestBody SimpleUserDTO userDTO){
+    public ResponseEntity<ApiResponse<String>> createProductOwner(@Valid @RequestBody SimpleUserDTO userDTO){
         String response = authService.createBackendRole(userDTO, Role.PRODUCT_OWNER);
-        Map<String, String> body = new HashMap<>();
-        body.put("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
     @PostMapping("/users/create/delivery-agent")
-    public ResponseEntity<Map <String, String>> createDeliveryAgent(@Valid @RequestBody SimpleUserDTO userDTO){
+    public ResponseEntity<ApiResponse<String>> createDeliveryAgent(@Valid @RequestBody SimpleUserDTO userDTO){
         String response = authService.createBackendRole(userDTO, Role.DELIVERY_AGENT);
-        Map<String, String> body = new HashMap<>();
-        body.put("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
     @PatchMapping("/users/reset-password")
-    public ResponseEntity<UserLoginDTO> resetPassword(@RequestParam String username){
+    public ResponseEntity<ApiResponse<UserLoginDTO>> resetPassword(@RequestParam String username){
         UserLoginDTO response = userService.adminResetPassword(username);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        String message = "User: "+username+" Password reset successfully";
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(message, response));
     }
 }

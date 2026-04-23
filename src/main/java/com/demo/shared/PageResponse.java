@@ -10,7 +10,10 @@ public record PageResponse <T>(
     int size,
     long totalElements,
     int totalPages,
-    boolean last
+    boolean hasNext,            // Frontend flag for next button
+    boolean hasPrevious,        // Frontend flag for previous button
+    boolean last,               //Frontend flag for last page
+    boolean first               //Frontend flag for first page
 ) {
     public static <T> PageResponse<T> fromPage(Page<T> page){
         return new PageResponse<>(
@@ -19,7 +22,10 @@ public record PageResponse <T>(
                 page.getSize(),
                 page.getTotalElements(),
                 page.getTotalPages(),
-                page.isLast()
+                page.hasNext(),
+                page.hasPrevious(),
+                page.isLast(),
+                page.isFirst()
         );
     }
 }

@@ -7,6 +7,7 @@ import com.demo.model.product.ProductResponseDTO;
 import com.demo.model.user.*;
 import com.demo.service.UserService;
 import com.demo.service.auth.AuthService;
+import com.demo.shared.ApiResponse;
 import com.demo.shared.PageResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @CrossOrigin
 public class UserController {
 
@@ -34,107 +34,94 @@ public class UserController {
     AuthService authService;
 
     @GetMapping("/all")
-    public PageResponse<UserResponseDTO> findAllUsers(
-            @PageableDefault(sort = "userId", direction = Sort.Direction.ASC) Pageable pageable
-    ){
-        return PageResponse.fromPage(userService.findAllUsers(pageable)
+    public ResponseEntity<ApiResponse<PageResponse<UserResponseDTO>>> findAllUsers(
+            @PageableDefault(sort = "userId", direction = Sort.Direction.ASC) Pageable pageable){
+        var response = PageResponse.fromPage(userService.findAllUsers(pageable)
                 .map(UserConverter::toUserResponseDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @GetMapping("/my-profile")
-    public ResponseEntity<UserProfileDTO> getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<UserProfileDTO>> getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal){
         User user = userService.findUserById(userPrincipal.user().getUserId());
         UserProfileDTO responseDTO = UserConverter.toUserProfileDTO(user);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> findUserById(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<UserResponseDTO>> findUserById(@PathVariable Long id){
         User user = userService.findUserById(id);
         UserResponseDTO responseDTO = UserConverter.toUserResponseDTO(user);
-        return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-    }
-
-    @PostMapping("/add")    //For Testing
-    public ResponseEntity<Map <String, String>> addUser(@RequestBody UserDTO userDTO){
-        String response = authService.register(userDTO);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
     }
 
     @PutMapping("/update/profile")
-    public ResponseEntity<Map <String, String>> updateIdentity(@Valid @RequestBody SimpleUserDTO updatedDTO, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<String>> updateIdentity(@Valid @RequestBody SimpleUserDTO updatedDTO, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updateIdentity(updatedDTO, userPrincipal);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @PutMapping("/update/password")
-    public ResponseEntity<Map <String, String>> updatePassword(@Valid @RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<String>> updatePassword(@Valid @RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updatePassword(dto, userPrincipal);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Map <String, String>> deleteUser(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable Long id){
         String response = userService.deleteUser(id);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @GetMapping("/address")
-    public ResponseEntity<List<Address>> findUserAddress(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<List<Address>>> findUserAddress(@AuthenticationPrincipal UserPrincipal userPrincipal){
         List<Address> addresses = userService.findUserAddress(userPrincipal);
-        return ResponseEntity.status(HttpStatus.OK).body(addresses);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(addresses));
     }
 
     @PostMapping("/address")
-    public ResponseEntity<Map <String, String>> addAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<String>> addAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.addAddress(userPrincipal, address);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
     @PutMapping("/address/{index}")
-    public ResponseEntity<Map <String, String>> updateAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
+    public ResponseEntity<ApiResponse<String>> updateAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
         String response = userService.updateAddress(userPrincipal, index, address);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @DeleteMapping("/address/{index}")
-    public ResponseEntity<Map <String, String>> removeAddress(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
+    public ResponseEntity<ApiResponse<String>> removeAddress(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
         String response = userService.removeAddress(userPrincipal, index);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @GetMapping("/wishlist")
-    public ResponseEntity<Set <ProductResponseDTO>> getUserWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> getUserWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
         Set<Product> productSet = userService.getUserWishlist(userPrincipal);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
-        return ResponseEntity.status(HttpStatus.OK).body(wishlist);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(wishlist));
     }
 
     @PostMapping("/wishlist/add")
-    public ResponseEntity<Set <ProductResponseDTO>> addProductToWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
+    public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> addProductToWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
         Set<Product> productSet = userService.addProductToWishlist(userPrincipal, productId);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
-        return ResponseEntity.status(HttpStatus.CREATED).body(wishlist);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(wishlist));
     }
 
     @PatchMapping("/wishlist/remove")
-    public ResponseEntity<Set <ProductResponseDTO>> removeProductFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
+    public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> removeProductFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
         Set<Product> productSet = userService.removeProductFromWishlist(userPrincipal, productId);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
-        return ResponseEntity.status(HttpStatus.OK).body(wishlist);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(wishlist));
     }
 
     @DeleteMapping("/wishlist/clear")
-    public ResponseEntity<Map <String, String>> emptyWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<String>> emptyWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.emptyWishlist(userPrincipal);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 }
