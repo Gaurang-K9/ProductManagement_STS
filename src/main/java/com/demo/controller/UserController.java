@@ -58,7 +58,6 @@ public class UserController {
     @PutMapping("/update/profile")
     public ResponseEntity<ApiResponse<String>> updateIdentity(@Valid @RequestBody SimpleUserDTO updatedDTO, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updateIdentity(updatedDTO, userPrincipal);
-        
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 

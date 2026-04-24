@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -64,7 +63,7 @@ public class AuthService {
         refreshTokenService.findByUser(user).ifPresent(refreshTokenService::delete);
 
         String accessToken = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, Instant.now());
 
         return new AuthResponse(accessToken, refreshToken.getToken(), user.isFirstLogin(), user.getRole());
     }
@@ -99,14 +98,16 @@ public class AuthService {
 
         refreshTokenService.verifyExpiration(refreshToken);
 
-        refreshToken.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));
-        refreshTokenService.save(refreshToken);
-
         User user = refreshToken.getUser();
+
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user, refreshToken.getCreatedAt());
+
+        refreshTokenService.delete(refreshToken);
+        refreshTokenService.save(newRefreshToken);
 
         String newJwtToken = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
 
-        return new AuthResponse(newJwtToken, requestRefreshToken, user.isFirstLogin(), user.getRole());
+        return new AuthResponse(newJwtToken, newRefreshToken.getToken(), user.isFirstLogin(), user.getRole());
     }
 
     public String logout(UserPrincipal userPrincipal){
