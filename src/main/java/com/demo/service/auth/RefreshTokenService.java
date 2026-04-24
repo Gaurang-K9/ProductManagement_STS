@@ -19,13 +19,13 @@ public class RefreshTokenService {
     @Autowired
     RefreshTokenRepo refreshTokenRepo;
 
-    public RefreshToken createRefreshToken(User user) {
+    public RefreshToken createRefreshToken(User user, Instant previousCreatedAt) {
         RefreshToken refreshToken = new RefreshToken();
 
         refreshToken.setUser(user);
         refreshToken.setToken(UUID.randomUUID().toString());
         refreshToken.setExpiryDate(Instant.now().plus(7, ChronoUnit.DAYS));
-        refreshToken.setCreatedAt(Instant.now());
+        refreshToken.setCreatedAt(previousCreatedAt);
         return refreshTokenRepo.save(refreshToken);
     }
 
