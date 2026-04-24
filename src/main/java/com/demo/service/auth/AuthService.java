@@ -100,9 +100,8 @@ public class AuthService {
 
         User user = refreshToken.getUser();
 
-        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user, refreshToken.getCreatedAt());
-
         refreshTokenService.delete(refreshToken);
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user, refreshToken.getCreatedAt());
         refreshTokenService.save(newRefreshToken);
 
         String newJwtToken = jwtService.generateJWTToken(user.getUsername(), user.getRole().name());
