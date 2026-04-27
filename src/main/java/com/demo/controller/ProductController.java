@@ -1,8 +1,8 @@
 package com.demo.controller;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
+import com.demo.model.image.ImageUploadResponse;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductDTO;
 import com.demo.model.product.ProductResponseDTO;
@@ -79,9 +79,14 @@ public class ProductController {
 	}
 
 	@PutMapping("/update/{id}/image")
-	public ResponseEntity<ApiResponse<String>> addOrUpdateImageUrl(@PathVariable Long id ,@RequestBody Map<String, String> request){
-		String imageUrl = request.get("imageUrl");
-		String response = productService.addOrUpdateImageUrl(id, imageUrl);
+	public ResponseEntity<ApiResponse<String>> addOrUpdateImageUrl(@PathVariable Long id ,@RequestBody ImageUploadResponse request){
+		String response = productService.addOrUpdateImageUrl(id, request);
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
+	}
+
+	@DeleteMapping("/remove/{id}/image")
+	public ResponseEntity<ApiResponse<String>> addOrUpdateImageUrl(@PathVariable Long id){
+		String response = productService.removeImageUrl(id);
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
 	}
 
