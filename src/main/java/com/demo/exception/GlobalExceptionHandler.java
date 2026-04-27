@@ -9,8 +9,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.time.Instant;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -74,5 +77,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ExceptionResponse.of("Invalid Parameter", "Invalid value '" + value + "' for parameter '" + paramName + "'"));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ExceptionResponse> handleMaxSizeException(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ExceptionResponse.of("File size exceeds limit", "Payload Too Large"));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ExceptionResponse> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ExceptionResponse.of("Internal Server Error", ex.getMessage()));
     }
 }

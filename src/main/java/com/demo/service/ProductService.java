@@ -7,6 +7,7 @@ import java.util.List;
 import com.demo.exception.ConflictResourceException;
 import com.demo.exception.ResourceNotFoundException;
 import com.demo.exception.ForbiddenAccessException;
+import com.demo.model.image.ImageUploadResponse;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductDTO;
 import com.demo.model.company.Company;
@@ -33,6 +34,9 @@ public class ProductService {
 
     @Autowired
     UserRepo userRepo;
+
+    @Autowired
+    CloudinaryService cloudinaryService;
 
 	public Product findProductById(Long id) {
 		return productRepo.findById(id)
@@ -67,11 +71,19 @@ public class ProductService {
         return productRepo.findByOwner_Username(username, pageable);
     }
 
-    public String addOrUpdateImageUrl(Long productId, String imageUrl){
+    public String addOrUpdateImageUrl(Long productId, ImageUploadResponse imageUploadResponse) {
         Product product = findProductById(productId);
-        product.setImageUrl(imageUrl);
+        product.setImageUrl(imageUploadResponse.getImageUrl());
+        product.setPublicId(imageUploadResponse.getPublicId());
         productRepo.save(product);
         return "Image added to Product: "+product.getProductName()+" Successfully";
+    }
+
+    public String removeImageUrl(Long productId) {
+        Product product = findProductById(productId);
+        product.setImageUrl("");
+        productRepo.save(product);
+        return product.getPublicId();
     }
 
     public String addProduct(ProductDTO productDTO, Long userId) {
@@ -97,6 +109,11 @@ public class ProductService {
     public String deleteProduct(Long id) {
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
+
+        if(product.getImageUrl() != null && product.getPublicId() != null){
+            cloudinaryService.deleteImage(product.getPublicId());
+        }
+
         productRepo.delete(product);
         return "ProductId: "+product.getProductId()+" | Product: "+product.getProductName()+" Removed Successfully";
     }
