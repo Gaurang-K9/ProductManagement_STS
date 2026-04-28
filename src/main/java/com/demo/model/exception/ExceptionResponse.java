@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -13,11 +13,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ExceptionResponse {
 
-    private LocalDateTime timestamp;
+    private Instant timestamp;
     private String message;
     private String error;
 
     public static ExceptionResponse of(String message, String error){
-        return new ExceptionResponse(LocalDateTime.now(), message, error);
+        return new ExceptionResponse(Instant.now(), message, error);
     }
 }

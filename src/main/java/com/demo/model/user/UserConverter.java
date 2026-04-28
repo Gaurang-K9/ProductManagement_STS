@@ -3,6 +3,9 @@ package com.demo.model.user;
 import com.demo.model.address.Address;
 import com.demo.model.company.CompanyConverter;
 import com.demo.model.company.CompanyDTO;
+import com.demo.model.product.Product;
+import com.demo.model.product.ProductConverter;
+import com.demo.model.product.ProductResponseDTO;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,11 +63,12 @@ public class UserConverter {
         return userProfileDTO;
     }
 
-    public static ProductOwnerDTO toProductOwnerDTO(User user, List<String> products){
+    public static ProductOwnerDTO toProductOwnerDTO(User user, List<Product> products){
         ProductOwnerDTO productOwnerDTO = new ProductOwnerDTO();
         productOwnerDTO.setUsername(user.getUsername());
         productOwnerDTO.setEmail(user.getEmail());
-        productOwnerDTO.setProducts(products);
+        List<ProductResponseDTO> ownerProducts = ProductConverter.toProductResponseList(products);
+        productOwnerDTO.setProducts(ownerProducts);
         CompanyDTO companyDTO = CompanyConverter.toCompanyDTO(user.getCompany());
         productOwnerDTO.setCompany(companyDTO);
         return productOwnerDTO;

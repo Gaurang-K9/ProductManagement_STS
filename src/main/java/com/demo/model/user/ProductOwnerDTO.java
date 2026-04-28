@@ -1,6 +1,7 @@
 package com.demo.model.user;
 
 import com.demo.model.company.CompanyDTO;
+import com.demo.model.product.ProductResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,6 @@ public class ProductOwnerDTO {
 
     private String username;
     private String email;
-    private List<String> products;
+    private List<ProductResponseDTO> products;
     private CompanyDTO company;
 }

@@ -40,11 +40,6 @@ public class ReviewService {
                 .orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
     }
 
-    public String addReview(Review review){
-        reviewRepo.save(review);
-        return "Review added successfully";
-    }
-
     public String updateReview(Review review){
         reviewRepo.save(review);
         return "Review Updated Successfully";

@@ -1,16 +1,20 @@
 package com.demo.filter;
 
+import com.demo.model.exception.ExceptionResponse;
 import com.demo.model.user.UserPrincipal;
 import com.demo.constants.AuthEndpointConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -18,8 +22,11 @@ import java.util.Arrays;
 @Component
 public class FirstLoginFilter extends OncePerRequestFilter {
 
+    @Autowired
+    private JsonMapper jsonMapper;
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -28,17 +35,17 @@ public class FirstLoginFilter extends OncePerRequestFilter {
             boolean isFirstLogin = user.user().isFirstLogin();
             String path = request.getRequestURI();
 
-            boolean isAllowedPath = Arrays.stream(AuthEndpointConstants.FIRST_LOGIN_ALLOWED).anyMatch(path::startsWith);
+            boolean isAllowedPath = Arrays.stream(AuthEndpointConstants.FIRST_LOGIN_ALLOWED)
+                    .anyMatch(path::startsWith);
 
             if (isFirstLogin && !isAllowedPath) {
+
+                ExceptionResponse error = ExceptionResponse.of("Password Change Required", "Please change password before proceeding");
+
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 response.setContentType("application/json");
-                response.getWriter().write("""
-                {
-                  "message": "Password change required",
-                  "code": "FIRST_LOGIN"
-                }
-                """);
+
+                response.getWriter().write(jsonMapper.writeValueAsString(error));
                 response.getWriter().flush();
                 return;
             }

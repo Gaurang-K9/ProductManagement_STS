@@ -4,6 +4,7 @@ import com.demo.model.cart.*;
 import com.demo.model.order.*;
 import com.demo.model.user.UserPrincipal;
 import com.demo.service.CartService;
+import com.demo.shared.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +12,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/cart")
+@RequestMapping("/api/cart")
 @CrossOrigin
 public class CartController {
 
@@ -22,37 +22,35 @@ public class CartController {
     CartService cartService;
 
     @GetMapping("/user")
-    public ResponseEntity<CartDTO> returnUserCart(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<ApiResponse<CartDTO>> returnUserCart(@AuthenticationPrincipal UserPrincipal userPrincipal){
          Cart cart = cartService.returnUserCart(userPrincipal);
          CartDTO cartDTO = CartConverter.toCartDTO(cart);
-         return ResponseEntity.status(HttpStatus.OK).body(cartDTO);
+         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(cartDTO));
     }
 
     @DeleteMapping("/{cartid}/empty")
-    public ResponseEntity<Map <String, String>> emptyCartById(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<String>> emptyCartById(@PathVariable Long id){
         String response = cartService.emptyCart(id);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
     @PostMapping("/{cartid}/add-items")
-    public ResponseEntity<Map <String, String>> addItemsToCart(@RequestBody List<OrderItemDTO> items, @PathVariable Long id){
+    public ResponseEntity<ApiResponse<String>> addItemsToCart(@RequestBody List<OrderItemDTO> items, @PathVariable Long id){
         String response = cartService.addItemsToCart(items, id);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
     @PostMapping("/user/add-items")
-    public ResponseEntity<Map <String, String>> addItemsToUserCart(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody List<OrderItemDTO> items){
+    public ResponseEntity<ApiResponse<String>> addItemsToUserCart(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody List<OrderItemDTO> items){
         String response = cartService.addItemsToUserCart(userPrincipal, items);
-        Map <String, String> body = Map.of("response", response);
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
     @PostMapping("/{cartid}/order")
-    public ResponseEntity<OrderResponseDTO> placeCartToOrder(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long cartid){
+    public ResponseEntity<ApiResponse<OrderResponseDTO>> placeCartToOrder(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long cartid){
         Order order = cartService.placeCartToOrder(userPrincipal, cartid);
         OrderResponseDTO orderResponseDTO = OrderConverter.toOrderResponseDTO(order);
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDTO);
+        String message = "Order placed successfully";
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(message, orderResponseDTO));
     }
 }
