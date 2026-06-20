@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+//TODO Overhaul Payment Service to implement Idempotency
+// and instead of updating Payment Status add the same Payment along with new Payment Status? Tentative
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {

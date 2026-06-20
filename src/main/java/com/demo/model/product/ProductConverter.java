@@ -25,6 +25,16 @@ public class ProductConverter {
         return productResponseDTO;
     }
 
+    public static ProductDetailsResponseDTO toProductDetailsResponseDTO(Product product){
+        ProductDetailsResponseDTO productDetailsResponseDTO = new ProductDetailsResponseDTO();
+        productDetailsResponseDTO.setProductId(product.getProductId());
+        productDetailsResponseDTO.setProductName(product.getProductName());
+        productDetailsResponseDTO.setCategory(product.getCategory());
+        productDetailsResponseDTO.setPrice(product.getPrice());
+        productDetailsResponseDTO.setImageUrl(product.getImageUrl());
+        return productDetailsResponseDTO;
+    }
+
     public static List<ProductResponseDTO> toProductResponseList(List<Product> productList){
         List<ProductResponseDTO> dtoslist = new ArrayList<>();
         productList.forEach(product -> dtoslist.add(toProductResponseDTO(product)));

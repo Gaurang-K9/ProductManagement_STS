@@ -15,5 +15,5 @@ public class UserReviewResponseDTO {
     private String username;
     private String productName;
     private String review;
-    private Short star;
+    private Short rating;
 }

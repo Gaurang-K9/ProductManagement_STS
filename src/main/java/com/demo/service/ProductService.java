@@ -11,6 +11,8 @@ import com.demo.model.image.ImageUploadResponse;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductDTO;
 import com.demo.model.company.Company;
+import com.demo.model.product.ProductDetailsResponseDTO;
+import com.demo.model.review.Review;
 import com.demo.model.user.Role;
 import com.demo.model.user.User;
 import com.demo.repo.CompanyRepo;
@@ -43,6 +45,18 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", id));
 	}
 
+    public ProductDetailsResponseDTO findProductDetailsById(Long id) {
+        Product product = findProductById(id);
+
+        int reviewCount = product.getReviews().size();
+        double averageRating = product.getReviews().stream().mapToInt(Review::getRating).average().orElse(0.0);
+
+        ProductDetailsResponseDTO productDetailsResponseDTO = ProductConverter.toProductDetailsResponseDTO(product);
+        productDetailsResponseDTO.setAverageRating(averageRating);
+        productDetailsResponseDTO.setReviewCount(reviewCount);
+        return productDetailsResponseDTO;
+    }
+
     public Page<Product> findAllProducts(Pageable pageable){
         return productRepo.findAll(pageable);
     }
@@ -55,8 +69,8 @@ public class ProductService {
         return productRepo.findByPriceBetween(minPrice, maxPrice, pageable);
     }
 
-    public Page<Product> findProductsByStarMoreThan(Short star, Pageable pageable) {
-        return productRepo.findByAverageStarGreaterThan(star, pageable);
+    public Page<Product> findByAverageRatingGreaterThan(Short rating, Pageable pageable) {
+        return productRepo.findByAverageRatingGreaterThan(rating, pageable);
     }
 
     public List<Product> findProductsById(List<Long> productIds){

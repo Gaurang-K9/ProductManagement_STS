@@ -29,7 +29,7 @@ public class ReviewController {
                     .fromPage(reviewService.findReviewsByProductId(productId, pageable)
                     .map(ReviewConverter::toReviewResponseDTO));
             String message = "Reviews fetched for Product ID: "+productId;
-            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
+            return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(message, response));
         }
         var response = PageResponse
                 .fromPage(reviewService.findAllReviews(pageable)
@@ -59,20 +59,20 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @PostMapping("/post")
+    @PostMapping("/my/post")
     public ResponseEntity<ApiResponse<String>> addReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestBody ReviewDTO reviewDTO){
         String response = reviewService.addUserReview(userPrincipal, reviewDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
-    @PatchMapping("/update/{reviewid}")
+    @PatchMapping("/my/update/{reviewid}")
     public ResponseEntity<ApiResponse<String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid, @RequestBody ReviewDTO reviewDTO){
         String response = reviewService.updateUserReview(userPrincipal, reviewid, reviewDTO);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @DeleteMapping("/delete/{reviewid}")
-    public ResponseEntity<ApiResponse<String>> updateReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid) {
+    @DeleteMapping("/my/delete/{reviewid}")
+    public ResponseEntity<ApiResponse<String>> deleteReview(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long reviewid) {
         String response = reviewService.deleteUserReview(userPrincipal, reviewid);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }

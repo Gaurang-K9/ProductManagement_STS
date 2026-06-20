@@ -1,7 +1,7 @@
 package com.demo.service.auth;
 
-import com.demo.exception.BadRequestException;
 import com.demo.exception.ResourceNotFoundException;
+import com.demo.exception.UnauthorizedException;
 import com.demo.model.auth.RefreshToken;
 import com.demo.model.user.User;
 import com.demo.repo.RefreshTokenRepo;
@@ -31,7 +31,7 @@ public class RefreshTokenService {
 
     public RefreshToken findByToken(String refreshToken) {
         return refreshTokenRepo.findByToken(refreshToken)
-                .orElseThrow(() -> new BadRequestException("Invalid refresh token"));
+                .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
     }
 
     public Optional<RefreshToken> findByUser(User user) {
@@ -46,12 +46,12 @@ public class RefreshTokenService {
     public void verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepo.delete(token);
-            throw new BadRequestException("Refresh Token expired. Please login again.");
+            throw new UnauthorizedException("Refresh Token expired. Please login again.");
         }
 
         if (token.getCreatedAt().plus(30, ChronoUnit.DAYS).isBefore(Instant.now())) {
             refreshTokenRepo.delete(token);
-            throw new BadRequestException("Session expired. Please login again.");
+            throw new UnauthorizedException("Session expired. Please login again.");
         }
     }
 

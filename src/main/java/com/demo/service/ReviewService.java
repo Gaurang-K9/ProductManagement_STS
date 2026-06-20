@@ -49,7 +49,7 @@ public class ReviewService {
         Review oldReview = reviewRepo.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException(Review.class, "reviewId", id));
         oldReview.setReview(reviewDTO.getReview());
-        oldReview.setStar(reviewDTO.getStar());
+        oldReview.setRating(reviewDTO.getRating());
         reviewRepo.save(oldReview);
         return "Review updated successfully";
     }
@@ -85,7 +85,7 @@ public class ReviewService {
         Review review = validateResourceOwnership(reviewId, userId);
         Product product = review.getProductReview();
         review.setReview(reviewDTO.getReview());
-        review.setStar(reviewDTO.getStar());
+        review.setRating(reviewDTO.getRating());
         reviewRepo.save(review);
         return "Review updated for Product: "+product.getProductName()+" successfully";
     }

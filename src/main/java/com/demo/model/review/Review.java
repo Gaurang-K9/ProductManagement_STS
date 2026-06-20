@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 
+//TODO Posted at Datetime createdAt field
 @Entity
 @Getter
 @Setter
@@ -27,5 +28,5 @@ public class Review {
 	@JsonBackReference
 	private Product productReview;
 	private String review;
-    private Short star;
+    private Short rating;
 }

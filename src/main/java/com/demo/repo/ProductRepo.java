@@ -14,7 +14,7 @@ import com.demo.model.product.Product;
 @Repository
 public interface ProductRepo extends JpaRepository<Product, Long> {
 
-    String ratingMoreThanQuery = "SELECT p FROM Product p LEFT JOIN p.reviews r GROUP BY p HAVING COALESCE(AVG(r.star), 0) > :minAvgStar";
+    String ratingMoreThanQuery = "SELECT p FROM Product p LEFT JOIN p.reviews r GROUP BY p HAVING COALESCE(AVG(r.rating), 0) > :minAvgRating";
 
     Page<Product> findByCategory(String category, Pageable pageable);
 
@@ -25,5 +25,5 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     Page<Product> findByOwner_Username(String username, Pageable pageable);
 
     @Query(value = ratingMoreThanQuery)
-    Page<Product> findByAverageStarGreaterThan(@Param("minAvgStar") Short minAvgStar, Pageable pageable);
+    Page<Product> findByAverageRatingGreaterThan(@Param("minAvgRating") Short minAvgRating, Pageable pageable);
 }

@@ -1,5 +1,7 @@
 package com.demo.model.review;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,5 +16,6 @@ public class ReviewResponseDTO {
     private Long reviewId;
     private String username;
     private String review;
-    private Short star;
+    private Short rating;
+    private LocalDateTime createdAt;
 }

@@ -85,6 +85,12 @@ public class GlobalExceptionHandler {
                 .body(ExceptionResponse.of("File size exceeds limit", "Payload Too Large"));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ExceptionResponse> handleUnauthorizedException(UnauthorizedException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ExceptionResponse.of("Unauthorized. Please login", exception.getMessage()));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionResponse> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

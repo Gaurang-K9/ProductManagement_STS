@@ -8,7 +8,7 @@ public class ReviewConverter {
     public static Review toReview(ReviewDTO reviewDTO){
         Review review = new Review();
         review.setReview(reviewDTO.getReview());
-        review.setStar(reviewDTO.getStar());
+        review.setRating(reviewDTO.getRating());
         return review;
     }
 
@@ -17,7 +17,7 @@ public class ReviewConverter {
         reviewResponseDTO.setReviewId(review.getReviewId());
         reviewResponseDTO.setUsername(review.getUser().getUsername());
         reviewResponseDTO.setReview(review.getReview());
-        reviewResponseDTO.setStar(review.getStar());
+        reviewResponseDTO.setRating(review.getRating());
         return reviewResponseDTO;
     }
 
@@ -33,7 +33,7 @@ public class ReviewConverter {
         userReviewResponseDTO.setUsername(review.getUser().getUsername());
         userReviewResponseDTO.setProductName(review.getProductReview().getProductName());
         userReviewResponseDTO.setReview(review.getReview());
-        userReviewResponseDTO.setStar(review.getStar());
+        userReviewResponseDTO.setRating(review.getRating());
         return userReviewResponseDTO;
     }
 

@@ -13,9 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReviewDTO {
 
+    @NotNull
     private Long productId;
     @NotBlank
     private String review;
     @NotNull
-    private Short star;
+    private Short rating;
 }

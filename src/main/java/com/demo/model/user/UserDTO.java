@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class UserDTO {
 
     @NotBlank(message = "Username cannot be empty")
+    @Size(min = 4)
     @Pattern(regexp = RegexConstants.NO_SPACES, message = "Username cannot contain spaces")
     private String username;
 

@@ -3,9 +3,7 @@ package com.demo.controller;
 import java.math.BigDecimal;
 
 import com.demo.model.image.ImageUploadResponse;
-import com.demo.model.product.ProductConverter;
-import com.demo.model.product.ProductDTO;
-import com.demo.model.product.ProductResponseDTO;
+import com.demo.model.product.*;
 import com.demo.model.user.UserPrincipal;
 import com.demo.shared.ApiResponse;
 import com.demo.shared.PageResponse;
@@ -18,9 +16,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import com.demo.model.product.Product;
 import com.demo.service.ProductService;
 
+//TODO merge the category, rating, price range filter in one endpoint
+// Add search product by name api
+// Change range filter to use either minimum or maximum price range
 @RestController
 @RequestMapping("/api/products")
 @CrossOrigin
@@ -30,7 +30,7 @@ public class ProductController {
 	ProductService productService;
 
 	@GetMapping("/all")
-	public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> findAllProducts(
+	public ResponseEntity<ApiResponse<PageResponse<	ProductResponseDTO>>> findAllProducts(
 			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
 		var response = PageResponse
 				.fromPage(productService.findAllProducts(pageable)
@@ -48,9 +48,8 @@ public class ProductController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<ProductResponseDTO>> findProductById(@PathVariable Long id){
-		Product product = productService.findProductById(id);
-        ProductResponseDTO responseDTO = ProductConverter.toProductResponseDTO(product);
+	public ResponseEntity<ApiResponse<ProductDetailsResponseDTO>> findProductById(@PathVariable Long id){
+		ProductDetailsResponseDTO responseDTO = productService.findProductDetailsById(id);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
     }
 
@@ -64,10 +63,10 @@ public class ProductController {
 	}
 
 	@GetMapping("/review")
-	public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> findProductsByAverageStarsMoreThan(@RequestParam Short stars,
+	public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> findByAverageRatingGreaterThan(@RequestParam Short rating,
 			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
 		var response = PageResponse
-				.fromPage(productService.findProductsByStarMoreThan(stars, pageable)
+				.fromPage(productService.findByAverageRatingGreaterThan(rating, pageable)
 				.map(ProductConverter::toProductResponseDTO));
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
 	}

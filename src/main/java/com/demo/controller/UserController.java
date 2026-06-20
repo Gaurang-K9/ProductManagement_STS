@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Set;
 
+//TODO Add dashboard api for customer, product owner, admin, delivery agent
+// Dashboard DTO for all ROLES Customer, Product Owner, Delivery Agent, Admin
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin
