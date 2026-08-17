@@ -113,7 +113,7 @@ public class UserService {
         User user = findUserById(userId);
         user.getAddresses().add(address);
         userRepo.save(user);
-        return "address Added Successfully";
+        return "Address Added Successfully";
     }
 
     public String updateAddress(UserPrincipal userPrincipal, Integer addIndex ,Address address){
@@ -126,7 +126,7 @@ public class UserService {
         addressList.set(addIndex, address);
         user.setAddresses(addressList);
         userRepo.save(user);
-        return "address Updated Successfully";
+        return "Address Updated Successfully";
     }
 
     public String removeAddress(UserPrincipal userPrincipal, Integer addIndex){
@@ -138,7 +138,7 @@ public class UserService {
         }
         addressList.remove((int) addIndex);
         userRepo.save(user);
-        return "address Removed Successfully";
+        return "Address Removed Successfully";
     }
 
     public Set<Product> getUserWishlist(UserPrincipal userPrincipal){

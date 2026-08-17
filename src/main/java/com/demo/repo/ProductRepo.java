@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.demo.model.product.Product;
 
 @Repository
-public interface ProductRepo extends JpaRepository<Product, Long> {
+public interface ProductRepo extends JpaRepository<Product, Long>, ProductSearchRepository {
 
     String ratingMoreThanQuery = "SELECT p FROM Product p LEFT JOIN p.reviews r GROUP BY p HAVING COALESCE(AVG(r.rating), 0) > :minAvgRating";
 
@@ -26,4 +26,6 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
 
     @Query(value = ratingMoreThanQuery)
     Page<Product> findByAverageRatingGreaterThan(@Param("minAvgRating") Short minAvgRating, Pageable pageable);
+
+    Page<Product> findByCompany_CompanyId(Long companyId, Pageable pageable);
 }

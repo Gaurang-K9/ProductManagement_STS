@@ -4,7 +4,6 @@ import com.demo.model.product.Product;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.order.OrderItemDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CartItemConverter {
@@ -19,11 +18,11 @@ public class CartItemConverter {
     }
 
     public static List<CartItemDTO> toCartItemDTOSList(List<CartItem> cartItems){
-        List<CartItemDTO> cartItemDTOS = new ArrayList<>();
+/*        List<CartItemDTO> cartItemDTOS = new ArrayList<>();
         for(CartItem item: cartItems){
             cartItemDTOS.add(toCartItemDTO(item));
-        }
-        return cartItemDTOS;
+        }*/
+        return cartItems.stream().map(CartItemConverter::toCartItemDTO).toList();
     }
 
     public static OrderItemDTO toOrderItemDTO(CartItem cartItem){
@@ -34,10 +33,10 @@ public class CartItemConverter {
     }
 
     public static List<OrderItemDTO> toOrderItemDTOSList(List<CartItem> cartItems){
-        List<OrderItemDTO> orderItems = new ArrayList<>();
+/*        List<OrderItemDTO> orderItems = new ArrayList<>();
         for(CartItem cartItem:  cartItems){
             orderItems.add(toOrderItemDTO(cartItem));
-        }
-        return orderItems;
+        }*/
+        return cartItems.stream().map(CartItemConverter::toOrderItemDTO).toList();
     }
 }

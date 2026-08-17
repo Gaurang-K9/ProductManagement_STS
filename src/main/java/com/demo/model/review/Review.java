@@ -8,8 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
-//TODO Posted at Datetime createdAt field
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -29,4 +31,7 @@ public class Review {
 	private Product productReview;
 	private String review;
     private Short rating;
+	@CreationTimestamp
+	@Column(nullable = false, updatable = false)
+	private LocalDateTime createdAt;
 }

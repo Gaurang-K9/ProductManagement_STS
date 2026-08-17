@@ -1,5 +1,7 @@
 package com.demo.model.order;
 
+import com.demo.model.user.UserConverter;
+
 import java.util.List;
 
 public class OrderConverter {
@@ -7,8 +9,7 @@ public class OrderConverter {
     public static OrderResponseDTO toOrderResponseDTO(Order order){
         OrderResponseDTO responseDTO = new OrderResponseDTO();
         responseDTO.setOrderCode(order.getOrderCode());
-        responseDTO.setUsername(order.getUser().getUsername());
-        responseDTO.setEmail(order.getUser().getEmail());
+        responseDTO.setUser(UserConverter.toSimpleUserDTO(order.getUser()));
         List<ItemResponseDTO> items = OrderItemConverter.toItemResponseDTO(order);
         responseDTO.setItems(items);
         responseDTO.setOrderTime(order.getOrderTime());
@@ -21,8 +22,7 @@ public class OrderConverter {
     public static OrderDTO toOrderDTO(Order order){
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setOrderCode(order.getOrderCode());
-        orderDTO.setUsername(order.getUser().getUsername());
-        orderDTO.setEmail(order.getUser().getEmail());
+        orderDTO.setUser(UserConverter.toSimpleUserDTO(order.getUser()));
         orderDTO.setOrderTime(order.getOrderTime());
         orderDTO.setShippingAddress(order.getOrderAddress());
         orderDTO.setTotal(order.getTotal());

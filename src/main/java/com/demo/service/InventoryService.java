@@ -8,6 +8,7 @@ import com.demo.model.order.Order;
 import com.demo.model.order.OrderItem;
 import com.demo.model.product.Product;
 import com.demo.repo.InventoryRepo;
+import com.demo.repo.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,7 @@ public class InventoryService {
     InventoryRepo inventoryRepo;
 
     @Autowired
-    ProductService productService;
+    ProductRepo productRepo;
 
     private Integer defaultStockThreshold(Product product){
         BigDecimal productPrice = product.getPrice();
@@ -39,7 +40,8 @@ public class InventoryService {
     }
 
     public Inventory createInventory(Long productId, Integer quantity){
-        Product product = productService.findProductById(productId);
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException(Product.class, "productId", productId));
         Integer stockThreshold = defaultStockThreshold(product);
 
         Inventory inventory = new Inventory();
@@ -63,23 +65,13 @@ public class InventoryService {
         return inventoryRepo.save(inventory);
     }
 
-    public void updateStockAndReserveQuantity(Order order){
-        List<OrderItem> items = order.getItems();
-
-        switch (order.getOrderStatus()) {
-            case CREATED -> placeOrder(items);
-            case DELIVERED -> deliverOrder(items);
-            case CANCELLED -> cancelOrder(items);
-            case RETURNED -> returnOrder(items);
-        }
-    }
-
     private void validateItem(OrderItem item) {
         if (item.getQuantity() <= 0)
             throw new BadRequestException("Invalid item quantity: " + item.getQuantity());
     }
 
-    private void deliverOrder(List<OrderItem> items) {
+    public void deliverOrder(Order order) {
+        List<OrderItem> items = order.getItems();
         for(OrderItem item: items){
             Inventory inventory = findInventoryByProductId(item.getProduct().getProductId());
             validateItem(item);
@@ -93,7 +85,8 @@ public class InventoryService {
         }
     }
 
-    private void placeOrder(List<OrderItem> items) {
+    public void placeOrder(Order order) {
+        List<OrderItem> items = order.getItems();
         for(OrderItem item: items){
             Inventory inventory = findInventoryByProductId(item.getProduct().getProductId());
             validateItem(item);
@@ -109,7 +102,8 @@ public class InventoryService {
         }
     }
 
-    private void cancelOrder(List<OrderItem> items) {
+    public void cancelOrder(Order order) {
+        List<OrderItem> items = order.getItems();
         for(OrderItem item: items){
             Inventory inventory = findInventoryByProductId(item.getProduct().getProductId());
             validateItem(item);
@@ -126,7 +120,8 @@ public class InventoryService {
         }
     }
 
-    private void returnOrder(List<OrderItem> items) {
+    public void returnOrder(Order order) {
+        List<OrderItem> items = order.getItems();
         for(OrderItem item: items){
             Inventory inventory = findInventoryByProductId(item.getProduct().getProductId());
             validateItem(item);

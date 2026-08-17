@@ -1,6 +1,7 @@
 package com.demo.controller;
 
 import com.demo.model.address.Address;
+import com.demo.model.address.AddressResponseDTO;
 import com.demo.model.product.Product;
 import com.demo.model.product.ProductConverter;
 import com.demo.model.product.ProductResponseDTO;
@@ -43,7 +44,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @GetMapping("/my-profile")
+    @GetMapping("/my/profile")
     public ResponseEntity<ApiResponse<UserProfileDTO>> getMyProfile(@AuthenticationPrincipal UserPrincipal userPrincipal){
         User user = userService.findUserById(userPrincipal.user().getUserId());
         UserProfileDTO responseDTO = UserConverter.toUserProfileDTO(user);
@@ -57,13 +58,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
     }
 
-    @PutMapping("/update/profile")
+    @PutMapping("/my/update/profile")
     public ResponseEntity<ApiResponse<String>> updateIdentity(@Valid @RequestBody SimpleUserDTO updatedDTO, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updateIdentity(updatedDTO, userPrincipal);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @PutMapping("/update/password")
+    @PutMapping("/my/update/password")
     public ResponseEntity<ApiResponse<String>> updatePassword(@Valid @RequestBody ChangePasswordDTO dto, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.updatePassword(dto, userPrincipal);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
@@ -75,52 +76,53 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @GetMapping("/address")
-    public ResponseEntity<ApiResponse<List<Address>>> findUserAddress(@AuthenticationPrincipal UserPrincipal userPrincipal){
-        List<Address> addresses = userService.findUserAddress(userPrincipal);
+    @GetMapping("/my/address")
+    public ResponseEntity<ApiResponse<List<AddressResponseDTO>>> findUserAddress(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        List<Address> userAddressList = userService.findUserAddress(userPrincipal);
+        List<AddressResponseDTO> addresses = UserConverter.toAddressResponseDTOList(userAddressList);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(addresses));
     }
 
-    @PostMapping("/address")
+    @PostMapping("/my/address")
     public ResponseEntity<ApiResponse<String>> addAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.addAddress(userPrincipal, address);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(response));
     }
 
-    @PutMapping("/address/{index}")
+    @PutMapping("/my/address/{index}")
     public ResponseEntity<ApiResponse<String>> updateAddress(@RequestBody Address address, @AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
         String response = userService.updateAddress(userPrincipal, index, address);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @DeleteMapping("/address/{index}")
+    @DeleteMapping("/my/address/{index}")
     public ResponseEntity<ApiResponse<String>> removeAddress(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Integer index){
         String response = userService.removeAddress(userPrincipal, index);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 
-    @GetMapping("/wishlist")
+    @GetMapping("/my/wishlist")
     public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> getUserWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
         Set<Product> productSet = userService.getUserWishlist(userPrincipal);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(wishlist));
     }
 
-    @PostMapping("/wishlist/add")
-    public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> addProductToWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
+    @PostMapping("/my/wishlist/add/{productId}")
+    public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> addProductToWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long productId){
         Set<Product> productSet = userService.addProductToWishlist(userPrincipal, productId);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.of(wishlist));
     }
 
-    @PatchMapping("/wishlist/remove")
-    public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> removeProductFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @RequestParam Long productId){
+    @PatchMapping("/my/wishlist/remove/{productId}")
+    public ResponseEntity<ApiResponse<Set<ProductResponseDTO>>> removeProductFromWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long productId){
         Set<Product> productSet = userService.removeProductFromWishlist(userPrincipal, productId);
         Set<ProductResponseDTO> wishlist = ProductConverter.toProductResponseSet(productSet);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(wishlist));
     }
 
-    @DeleteMapping("/wishlist/clear")
+    @DeleteMapping("/my/wishlist/clear")
     public ResponseEntity<ApiResponse<String>> emptyWishlist(@AuthenticationPrincipal UserPrincipal userPrincipal){
         String response = userService.emptyWishlist(userPrincipal);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));

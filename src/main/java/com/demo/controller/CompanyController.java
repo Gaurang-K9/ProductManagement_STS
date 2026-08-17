@@ -37,10 +37,10 @@ public class CompanyController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<CompanyResponseDTO>> findCompanyById(@PathVariable Long id){
+	public ResponseEntity<ApiResponse<CompanyDTO>> findCompanyById(@PathVariable Long id){
 		Company company = companyService.findCompanyById(id);
-        CompanyResponseDTO companyResponseDTO = CompanyConverter.toCompanyResponseDTO(company);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(companyResponseDTO));
+		CompanyDTO companyDTO = CompanyConverter.toCompanyDTO(company);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(companyDTO));
     }
 	
 	@PostMapping("/add")

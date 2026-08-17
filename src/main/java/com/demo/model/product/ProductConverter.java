@@ -1,9 +1,8 @@
 package com.demo.model.product;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProductConverter {
 
@@ -32,24 +31,28 @@ public class ProductConverter {
         productDetailsResponseDTO.setCategory(product.getCategory());
         productDetailsResponseDTO.setPrice(product.getPrice());
         productDetailsResponseDTO.setImageUrl(product.getImageUrl());
+        productDetailsResponseDTO.setDescription(product.getDescription());
         return productDetailsResponseDTO;
     }
 
     public static List<ProductResponseDTO> toProductResponseList(List<Product> productList){
-        List<ProductResponseDTO> dtoslist = new ArrayList<>();
+/*        List<ProductResponseDTO> dtoslist = new ArrayList<>();
         productList.forEach(product -> dtoslist.add(toProductResponseDTO(product)));
-        return dtoslist;
+        return dtoslist;*/
+        return productList.stream().map(ProductConverter::toProductResponseDTO).toList();
     }
 
     public static Set<ProductResponseDTO> toProductResponseSet(Set<Product> wishlist){
-        Set<ProductResponseDTO> dtoSet = new HashSet<>();
+/*        Set<ProductResponseDTO> dtoSet = new HashSet<>();
         wishlist.forEach( product -> dtoSet.add(toProductResponseDTO(product)));
-        return dtoSet;
+        return dtoSet;*/
+        return wishlist.stream().map(ProductConverter::toProductResponseDTO).collect(Collectors.toSet());
     }
 
     public static List<String> toProductNameList(List<Product> productlist){
-        List<String> products = new ArrayList<>();
+/*        List<String> products = new ArrayList<>();
         productlist.forEach(product -> products.add(product.getProductName()));
-        return products;
+        return products;*/
+        return productlist.stream().map(Product::getProductName).toList();
     }
 }

@@ -1,6 +1,7 @@
 package com.demo.model.company;
 
-import java.util.ArrayList;
+import com.demo.model.product.Product;
+
 import java.util.List;
 
 public class CompanyConverter {
@@ -27,16 +28,16 @@ public class CompanyConverter {
         companyResponseDTO.setCompany(company.getCompany());
         companyResponseDTO.setCompanyType(company.getCompanyType());
 
-        List<String> products = new ArrayList<>();
-        company.getProducts().forEach(product -> products.add(product.getProductName()));
+        List<String> products = company.getProducts().stream().map(Product::getProductName).toList();
         companyResponseDTO.setProducts(products);
 
         return companyResponseDTO;
     }
 
     public static List<CompanyDTO> toCompanyDTOList(List<Company> companyList){
-        List<CompanyDTO> responseList = new ArrayList<>();
+/*        List<CompanyDTO> responseList = new ArrayList<>();
         companyList.forEach(company -> responseList.add(toCompanyDTO(company)));
-        return responseList;
+        return responseList;*/
+        return companyList.stream().map(CompanyConverter::toCompanyDTO).toList();
     }
 }

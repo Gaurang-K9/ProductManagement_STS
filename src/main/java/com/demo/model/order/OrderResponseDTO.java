@@ -1,5 +1,6 @@
 package com.demo.model.order;
 
+import com.demo.model.user.SimpleUserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,8 +17,7 @@ import java.util.List;
 public class OrderResponseDTO {
 
     private String orderCode;
-    private String username;
-    private String email;
+    private SimpleUserDTO user;
     private List<ItemResponseDTO> items;
     private LocalDateTime orderTime;
     private OrderAddress shippingAddress;

@@ -17,6 +17,7 @@ public class ProductDetailsResponseDTO {
     private String productName;
     private String category;
     private BigDecimal price;
+    private String description;
     private String imageUrl;
     private Double averageRating;
     private Integer reviewCount;

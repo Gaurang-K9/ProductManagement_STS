@@ -30,10 +30,30 @@ public class ProductController {
 	ProductService productService;
 
 	@GetMapping("/all")
-	public ResponseEntity<ApiResponse<PageResponse<	ProductResponseDTO>>> findAllProducts(
+	public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> findAllProducts(
 			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
 		var response = PageResponse
 				.fromPage(productService.findAllProducts(pageable)
+				.map(ProductConverter::toProductResponseDTO));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<ApiResponse<ProductDetailsResponseDTO>> findProductById(@PathVariable Long id){
+		ProductDetailsResponseDTO responseDTO = productService.findProductDetailsById(id);
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
+	}
+
+	@GetMapping
+	public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> searchProducts(
+			@RequestParam(required = false) String name,
+			@RequestParam(required = false) String category,
+			@RequestParam(required = false) BigDecimal minPrice,
+			@RequestParam(required = false) BigDecimal maxPrice,
+			@RequestParam(required = false) Short rating,
+			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
+		var response = PageResponse
+				.fromPage(productService.findProductByFilters(name, category, minPrice, maxPrice, rating, pageable)
 				.map(ProductConverter::toProductResponseDTO));
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
 	}
@@ -46,12 +66,6 @@ public class ProductController {
 						.map(ProductConverter::toProductResponseDTO));
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
 	}
-
-	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<ProductDetailsResponseDTO>> findProductById(@PathVariable Long id){
-		ProductDetailsResponseDTO responseDTO = productService.findProductDetailsById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(responseDTO));
-    }
 
 	@GetMapping("/price")
 	public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> findProductsInPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max,
@@ -67,6 +81,15 @@ public class ProductController {
 			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
 		var response = PageResponse
 				.fromPage(productService.findByAverageRatingGreaterThan(rating, pageable)
+				.map(ProductConverter::toProductResponseDTO));
+		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
+	}
+
+	@GetMapping("/company/{id}")
+	public ResponseEntity<ApiResponse<PageResponse<ProductResponseDTO>>> findByCompanyId(@PathVariable Long id,
+			@PageableDefault(sort = "productId", direction = Sort.Direction.ASC) Pageable pageable){
+		var response = PageResponse
+				.fromPage(productService.findProductsByCompanyId(id, pageable)
 				.map(ProductConverter::toProductResponseDTO));
 		return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
 	}

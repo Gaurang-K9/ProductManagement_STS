@@ -10,6 +10,8 @@ import com.demo.model.user.User;
 import com.demo.model.user.UserPrincipal;
 import com.demo.repo.OrderRepo;
 import com.demo.repo.ProductRepo;
+import com.demo.repo.UserRepo;
+import com.demo.util.IdentifierGenerator;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,9 @@ import java.util.List;
 public class OrderService {
 
     @Autowired
+    UserRepo userRepo;
+
+    @Autowired
     OrderRepo orderRepo;
 
     @Autowired
@@ -33,6 +38,9 @@ public class OrderService {
 
     @Autowired
     InventoryService inventoryService;
+
+    @Autowired
+    ShipmentService shipmentService;
 
     public Order createOrder(UserPrincipal userPrincipal, List<OrderItemDTO> itemDTOS, OrderAddress shippingAddress){
         User user = userPrincipal.user();
@@ -61,9 +69,8 @@ public class OrderService {
         log.info("Order Total: {}", total);
         String orderCode = generateOrderCode(order);
         order.setOrderCode(orderCode);
-        order.setOrderTime(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.CREATED);
-        inventoryService.updateStockAndReserveQuantity(order);
+        inventoryService.placeOrder(order);
         return orderRepo.save(order);
     }
 
@@ -86,15 +93,8 @@ public class OrderService {
     }
 
     private String generateOrderCode(Order order){
-        String orderCode = "";
-        String category = order.getItems().getFirst().getProduct().getCategory();
-        String product = order.getItems().getFirst().getProduct().getProductName();
-
-        category = (category.length() >= 3 ? category.substring(0,3) : category).toUpperCase();
-        product = (product.length() >= 3 ? product.substring(0,3) : product).toUpperCase();
-        long millis = System.currentTimeMillis();
-        orderCode = category + product + millis;
-        return orderCode;
+        String metadata = order.getOrderAddress().getPincode();
+        return IdentifierGenerator.generate(IdentifierGenerator.ORDER_PREFIX, metadata);
     }
 
     public Order updateOrder(Order order){
@@ -104,6 +104,14 @@ public class OrderService {
     public Order findOrderByOrderCode(String orderCode){
         return orderRepo.findByOrderCode(orderCode)
                 .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
+    }
+
+    public Page<Order> findOrdersByFilters(String pincode, BigDecimal minTotal, BigDecimal maxTotal, LocalDateTime from, LocalDateTime to, OrderStatus status, Long userId, String username, Pageable pageable) {
+        if (userId != null && username != null) {
+            throw new BadRequestException("Provide either userId or username, not both.");
+        }
+
+        return orderRepo.searchOrders(pincode, minTotal, maxTotal, from, to, status, userId, username, pageable);
     }
 
     public Page<Order> findOrdersByPincode(String pincode, Pageable pageable) {
@@ -122,32 +130,34 @@ public class OrderService {
         return orderRepo.findByOrderAddress_PincodeAndTotalGreaterThan(pincode, total, pageable);
     }
 
+    public Page<Order> findOrderByUserId(Long userId, Pageable pageable) {
+        return orderRepo.findByUser_UserId(userId, pageable);
+    }
+
     public Order cancelOrder(UserPrincipal userPrincipal, String orderCode){
-        Order order = orderRepo.findByOrderCode(orderCode)
-                .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
-        User inputUser = userPrincipal.user();
-        User orderUser = order.getUser();
-        if(!inputUser.equals(orderUser)){
-            throw ForbiddenAccessException.forAction("cancel", Order.class);
-        }
+        Order order = validateResourceOwnership(userPrincipal, orderCode, "cancel");
         order.setOrderStatus(OrderStatus.CANCELLED);
-        inventoryService.updateStockAndReserveQuantity(order);
+        inventoryService.cancelOrder(order);
         return orderRepo.save(order);
     }
 
     public Order returnOrder(UserPrincipal userPrincipal, String orderCode){
-        Order order = orderRepo.findByOrderCode(orderCode)
-                .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
-        User inputUser = userPrincipal.user();
-        User orderUser = order.getUser();
-        if(!inputUser.equals(orderUser)){
-            throw ForbiddenAccessException.forAction("return", Order.class);
-        }
+        Order order = validateResourceOwnership(userPrincipal, orderCode, "return");
         if(order.getOrderStatus() != OrderStatus.DELIVERED){
             throw new ConflictResourceException("Order has not been delivered");
         }
         order.setOrderStatus(OrderStatus.RETURNED);
-        inventoryService.updateStockAndReserveQuantity(order);
+        shipmentService.returnShipment(order.getShipment());
+        inventoryService.returnOrder(order);
         return orderRepo.save(order);
+    }
+
+    private Order validateResourceOwnership(UserPrincipal userPrincipal, String orderCode, String action) {
+        Order order = orderRepo.findByOrderCode(orderCode)
+                .orElseThrow(() -> new ResourceNotFoundException(Order.class, "orderCode", orderCode));
+        if (!order.getUser().getUserId().equals(userPrincipal.user().getUserId())) {
+            throw ForbiddenAccessException.forAction(action, Order.class);
+        }
+        return order;
     }
 }

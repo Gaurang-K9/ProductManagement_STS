@@ -16,6 +16,9 @@ import java.util.List;
 public class ProductOwnerDTO {
 
     private String username;
+    private String firstName;
+    private String lastName;
+    private String mobileNumber;
     private String email;
     private List<ProductResponseDTO> products;
     private CompanyDTO company;

@@ -1,11 +1,13 @@
 package com.demo.model.order;
 
+import com.demo.model.shipment.Shipment;
 import com.demo.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,10 +31,14 @@ public class Order {
     private User user;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime orderTime;
     @Embedded
     private OrderAddress orderAddress;
     private BigDecimal total;
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Shipment shipment;
 }

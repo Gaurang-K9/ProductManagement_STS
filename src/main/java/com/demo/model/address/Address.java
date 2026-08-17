@@ -15,10 +15,13 @@ import lombok.Setter;
 @Embeddable
 public class Address {
 
+    @NotNull
     private String streetAddress;
     @NotNull
     @Pattern(regexp="\\d{6}", message="Pincode must be exactly 6 digits")
     private String pincode;
+    @NotNull
     private String city;
+    @NotNull
     private String state;
 }

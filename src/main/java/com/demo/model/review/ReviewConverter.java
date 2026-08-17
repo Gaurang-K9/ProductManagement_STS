@@ -1,6 +1,5 @@
 package com.demo.model.review;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewConverter {
@@ -18,13 +17,15 @@ public class ReviewConverter {
         reviewResponseDTO.setUsername(review.getUser().getUsername());
         reviewResponseDTO.setReview(review.getReview());
         reviewResponseDTO.setRating(review.getRating());
+        reviewResponseDTO.setCreatedAt(review.getCreatedAt());
         return reviewResponseDTO;
     }
 
     public static List<ReviewResponseDTO> toReviewResponseList(List<Review> reviews){
-        List<ReviewResponseDTO> dtosList = new ArrayList<>();
+        /*List<ReviewResponseDTO> dtosList = new ArrayList<>();
         reviews.forEach(review -> dtosList.add(toReviewResponseDTO(review)));
-        return dtosList;
+        return dtosList;*/
+        return reviews.stream().map(ReviewConverter::toReviewResponseDTO).toList();
     }
 
     public static UserReviewResponseDTO toUserReviewResponseDTO(Review review){
@@ -34,12 +35,14 @@ public class ReviewConverter {
         userReviewResponseDTO.setProductName(review.getProductReview().getProductName());
         userReviewResponseDTO.setReview(review.getReview());
         userReviewResponseDTO.setRating(review.getRating());
+        userReviewResponseDTO.setCreatedAt(review.getCreatedAt());
         return userReviewResponseDTO;
     }
 
     public static List<UserReviewResponseDTO> toUserReviewsList(List<Review> reviews){
-        List<UserReviewResponseDTO> dtosList = new ArrayList<>();
+        /*List<UserReviewResponseDTO> dtosList = new ArrayList<>();
         reviews.forEach(review -> dtosList.add(toUserReviewResponseDTO(review)));
-        return dtosList;
+        return dtosList;*/
+        return reviews.stream().map(ReviewConverter::toUserReviewResponseDTO).toList();
     }
 }

@@ -57,6 +57,10 @@ public class ProductService {
         return productDetailsResponseDTO;
     }
 
+    public Page<Product> findProductByFilters(String name, String category, BigDecimal minPrice, BigDecimal maxPrice, Short rating, Pageable pageable){
+        return productRepo.searchProducts(name, category, minPrice, maxPrice, rating, pageable);
+    }
+
     public Page<Product> findAllProducts(Pageable pageable){
         return productRepo.findAll(pageable);
     }
@@ -83,6 +87,10 @@ public class ProductService {
 
     public Page<Product> findProductsByOwnerUsername(String username, Pageable pageable) {
         return productRepo.findByOwner_Username(username, pageable);
+    }
+
+    public Page<Product> findProductsByCompanyId(Long id, Pageable pageable) {
+        return productRepo.findByCompany_CompanyId(id, pageable);
     }
 
     public String addOrUpdateImageUrl(Long productId, ImageUploadResponse imageUploadResponse) {

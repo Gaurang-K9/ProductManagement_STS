@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepo extends JpaRepository<Order, Long> {
+public interface OrderRepo extends JpaRepository<Order, Long>, OrderSearchRepository {
 
     Page<Order> findByOrderAddress_Pincode(String pincode, Pageable pageable);
 
@@ -20,6 +20,8 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     Page<Order> findByOrderAddress_PincodeAndTotalGreaterThan(String pincode, BigDecimal total, Pageable pageable);
 
     Page<Order> findByOrderTimeBetween(LocalDateTime time1, LocalDateTime time2, Pageable pageable);
+
+    Page<Order> findByUser_UserId(Long userId, Pageable pageable);
 
     Optional<Order> findByOrderCode(String orderCode);
 }

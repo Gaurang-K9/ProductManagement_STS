@@ -15,6 +15,9 @@ import java.util.Set;
 public class UserResponseDTO {
 
     private String username;
+    private String firstName;
+    private String lastName;
+    private String mobileNumber;
     private String email;
     private Set<String> wishlist;
     private List<String> reviews;

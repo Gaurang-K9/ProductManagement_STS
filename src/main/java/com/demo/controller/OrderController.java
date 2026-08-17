@@ -19,7 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/order")
+@RequestMapping("/api/orders")
 @CrossOrigin
 public class OrderController {
 
@@ -105,6 +105,33 @@ public class OrderController {
         var response = PageResponse
                 .fromPage(orderService.findOrdersByPincodeAndTotalMoreThan(pincode, total, pageable)
                 .map(OrderConverter::toOrderDTO));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponseDTO>>> findUserOrders(@AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PageableDefault(sort = "orderId", direction = Sort.Direction.DESC) Pageable pageable){
+       Long userId = userPrincipal.user().getUserId();
+       var response = PageResponse
+               .fromPage(orderService.findOrderByUserId(userId, pageable)
+               .map(OrderConverter::toOrderResponseDTO));
+       return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<OrderDTO>>> findOrdersByFilters(
+            @RequestParam(required = false) String pincode,
+            @RequestParam(required = false) BigDecimal minTotal,
+            @RequestParam(required = false) BigDecimal maxTotal,
+            @RequestParam(required = false) LocalDateTime from,
+            @RequestParam(required = false) LocalDateTime to,
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String username,
+            @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable){
+        var response = PageResponse
+                .fromPage(orderService.findOrdersByFilters(pincode, minTotal, maxTotal, from, to, status, userId, username, pageable)
+                        .map(OrderConverter::toOrderDTO));
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.of(response));
     }
 }

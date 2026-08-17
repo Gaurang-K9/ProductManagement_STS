@@ -1,6 +1,6 @@
 package com.demo.model.user;
 
-import com.demo.model.address.Address;
+import com.demo.model.address.AddressResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 public class UserProfileDTO {
     private String username;
+    private String firstName;
+    private String lastName;
+    private String mobileNumber;
     private String email;
-    private List<Address> addresses = new ArrayList<>();
+    private List<AddressResponseDTO> addresses = new ArrayList<>();
 }

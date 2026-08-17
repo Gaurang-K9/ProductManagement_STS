@@ -32,6 +32,7 @@ public class Product {
 	private BigDecimal price;
 	private String imageUrl;
 	private String publicId;
+	private String description;
 	@ManyToOne
 	@JoinColumn(name = "company_id", nullable = false)
 	@JsonBackReference
